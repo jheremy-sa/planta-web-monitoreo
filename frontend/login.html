@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformación digital, Aplicando IA en Acuicultura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2f5;
+    --panel: #ffffff;
+    --border: #d7dee4;
+    --text: #16212b;
+    --muted: #5b6b78;
+    --accent: #0e7c86;
+    --accent-dark: #0b626a;
+    --alert: #c23b22;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .caja {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 32px;
+    border-radius: 12px;
+    width: 320px;
+  }
+  h2 { text-align: center; color: var(--text); margin-top: 0; font-size: 19px; }
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #f7f9fa;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+  }
+  button.principal {
+    width: 100%;
+    padding: 11px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  button.principal:hover { background: var(--accent-dark); }
+  #mensaje { color: var(--alert); text-align: center; margin-top: 10px; font-size: 14px; min-height: 18px; }
+  .separador {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin: 18px 0 12px;
+    position: relative;
+  }
+  .link-publico {
+    display: block;
+    text-align: center;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .link-publico:hover { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="caja">
+  <h2>Acceso Administrador</h2>
+  <input type="email" id="email" placeholder="Correo">
+  <input type="password" id="password" placeholder="Contraseña">
+  <button class="principal" onclick="iniciarSesion()">Ingresar</button>
+  <div id="mensaje"></div>
+
+  <div class="separador">o</div>
+  <a href="index.html" class="link-publico">Ver vista pública</a>
+</div>
+
+<script>
+  const URL_LOGIN = "https://planta-backend-ifsy.onrender.com/api/login";
+
+  async function iniciarSesion() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const mensaje = document.getElementById("mensaje");
+    mensaje.textContent = "";
+
+    try {
+      const resp = await fetch(URL_LOGIN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!resp.ok) {
+        mensaje.textContent = "Correo o contraseña incorrectos";
+        return;
+      }
+
+      const datos = await resp.json();
+      localStorage.setItem("token_admin", datos.access_token);
+      window.location.href = "admin.html";
+
+    } catch (e) {
+      mensaje.textContent = "No se pudo conectar con el servidor";
+    }
+  }
+
+  document.getElementById("password").addEventListener("keyup", (e) => {
+    if (e.key === "Enter") iniciarSesion();
+  });
+</script>
+
+</body>
+</html>

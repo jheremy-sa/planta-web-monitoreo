@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformación digital, Aplicando IA en Acuicultura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #eef2f5;
+    --panel: #ffffff;
+    --border: #d7dee4;
+    --text: #16212b;
+    --muted: #5b6b78;
+    --accent: #0e7c86;
+    --accent-dark: #0b626a;
+    --ok: #1f9d55;
+    --alert: #c23b22;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 20px 8px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .brand { font-weight: 700; font-size: 19px; display: flex; align-items: center; gap: 8px; }
+  .brand-mark { color: var(--accent); }
+  .link-admin {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .link-admin:hover { color: var(--accent); border-color: var(--accent); }
+
+  .estado-conexion {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 4px 0 20px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 20px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .panel-title {
+    margin: 0 0 14px;
+    font-size: 13px;
+    letter-spacing: .04em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .grid-sensores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+    gap: 10px;
+  }
+  .card-sensor {
+    background: #f7f9fa;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .card-sensor .label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .card-sensor .valor { font-size: 21px; font-weight: 600; }
+  .estado-led { display: flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 600; }
+
+  .led {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #c7ccd1;
+    flex-shrink: 0;
+  }
+  .led.ok { background: var(--ok); box-shadow: 0 0 6px rgba(31,157,85,.55); }
+  .led.alerta { background: var(--alert); box-shadow: 0 0 6px rgba(194,59,34,.55); }
+
+  .grafica-wrap { margin-top: 18px; }
+  .grafica-wrap h3 {
+    font-size: 13px; color: var(--muted); margin: 0 0 8px; font-weight: 600;
+  }
+
+  .camara-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #0c1116;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .camara-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .camara-fallback {
+    display: none;
+    color: #d7dee4;
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+  }
+  .camara-fallback .muted { color: #8a96a0; font-size: 12px; }
+  .btn-reintentar {
+    margin-top: 10px;
+    border: 1px solid #3a4555;
+    background: transparent;
+    color: #d7dee4;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  .btn-reintentar:hover { border-color: var(--accent); color: var(--accent); }
+  .ayuda { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+
+  .panel-mensajes { max-width: 1200px; margin: 0 auto 30px; padding: 0 20px; }
+  .panel-mensajes .panel { }
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #f7f9fa;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+  }
+  textarea { resize: vertical; }
+  .btn {
+    width: 100%;
+    padding: 11px;
+    margin-top: 8px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  #msg-estado { text-align: center; margin-top: 10px; font-size: 14px; }
+
+  .mensaje-item {
+    background: #f7f9fa;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: left;
+  }
+  .mensaje-item .meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .badge-pendiente { color: #b8860b; font-weight: bold; }
+  .badge-respondido { color: var(--ok); font-weight: bold; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">●</span> Transformación digital, Aplicando IA en Acuicultura</div>
+  <a href="login.html" class="link-admin" id="btn-admin-nav">Admin →</a>
+</header>
+
+<div id="estado-conexion" class="estado-conexion">Conectando...</div>
+
+<main class="layout">
+
+  <section class="panel">
+    <h2 class="panel-title">Variables del proceso</h2>
+    <div class="grid-sensores">
+      <div class="card-sensor"><div class="label">Nivel</div><div class="valor mono" id="v-nivel">--</div></div>
+      <div class="card-sensor"><div class="label">Caudal</div><div class="valor mono" id="v-caudal">--</div></div>
+      <div class="card-sensor"><div class="label">Temp. Ambiente</div><div class="valor mono" id="v-temp-amb">--</div></div>
+      <div class="card-sensor"><div class="label">Humedad</div><div class="valor mono" id="v-humedad">--</div></div>
+      <div class="card-sensor"><div class="label">Temp. Agua</div><div class="valor mono" id="v-temp-agua">--</div></div>
+      <div class="card-sensor">
+        <div class="label">Flotador Bajo</div>
+        <div class="estado-led"><span class="led" id="led-flot-bajo"></span><span id="v-flot-bajo">--</span></div>
+      </div>
+      <div class="card-sensor">
+        <div class="label">Flotador Alto</div>
+        <div class="estado-led"><span class="led" id="led-flot-alto"></span><span id="v-flot-alto">--</span></div>
+      </div>
+      <div class="card-sensor">
+        <div class="label">Bomba</div>
+        <div class="estado-led"><span class="led" id="led-bomba"></span><span id="v-bomba">--</span></div>
+      </div>
+      <div class="card-sensor">
+        <div class="label">Electroválvula</div>
+        <div class="estado-led"><span class="led" id="led-valvula"></span><span id="v-valvula">--</span></div>
+      </div>
+    </div>
+
+    <div class="grafica-wrap">
+      <h3>NIVEL DEL TANQUE · ÚLTIMOS 30 MIN</h3>
+      <canvas id="grafica-nivel" height="150"></canvas>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-title">Cámara en vivo</h2>
+    <div class="camara-wrap">
+      <img id="img-camara" src="https://planta-backend-ifsy.onrender.com/video-en-vivo"
+        alt="Cámara en vivo de la planta" onerror="mostrarFallbackCamara()">
+      <div id="camara-fallback" class="camara-fallback">
+        Cámara no disponible en este momento.<br>
+        <span class="muted">La laptop puede estar apagada o sin Internet.</span><br>
+        <button class="btn-reintentar" onclick="reintentarCamara()">Reintentar</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="panel-mensajes">
+  <div class="panel">
+    <h2 class="panel-title">¿Tienes una consulta?</h2>
+    <input type="text" id="msg-nombre" placeholder="Tu nombre">
+    <input type="email" id="msg-correo" placeholder="Tu correo">
+    <textarea id="msg-contenido" placeholder="Escribe tu mensaje..." rows="3"></textarea>
+    <button class="btn" onclick="enviarMensaje()">Enviar mensaje</button>
+    <div id="msg-estado"></div>
+  </div>
+</div>
+
+<div class="panel-mensajes">
+  <div class="panel">
+    <h2 class="panel-title">Revisa la respuesta a tu mensaje</h2>
+    <input type="email" id="buscar-correo" placeholder="El correo con el que escribiste">
+    <button class="btn" onclick="buscarMisMensajes()">Buscar</button>
+    <div id="resultado-busqueda" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<script>
+  // Si estamos dentro de un iframe (ej. "Ver Planta" en el panel admin),
+  // ocultar el boton "Admin →" y los paneles de mensajes (solo mostrar sensores + camara)
+  if (window.self !== window.top) {
+    const btnAdmin = document.getElementById("btn-admin-nav");
+    if (btnAdmin) btnAdmin.style.display = "none";
+    document.querySelectorAll('.panel-mensajes').forEach(el => el.style.display = 'none');
+  }
+
+  const URL_BACKEND = "https://planta-backend-ifsy.onrender.com/api/lecturas/ultima";
+  const URL_HISTORIAL = "https://planta-backend-ifsy.onrender.com/api/lecturas/historial?minutos=30";
+  const URL_CAMARA = "https://planta-backend-ifsy.onrender.com/video-en-vivo";
+  const INTERVALO_MS = 1200;
+
+  function pintarEstado(idLed, idTexto, activo, textoOn, textoOff) {
+    document.getElementById(idTexto).textContent = activo ? textoOn : textoOff;
+    const led = document.getElementById(idLed);
+    led.className = "led " + (activo ? "ok" : "alerta");
+  }
+
+  async function actualizarDatos() {
+    try {
+      const resp = await fetch(URL_BACKEND);
+      if (!resp.ok) throw new Error("Respuesta no OK");
+      const d = await resp.json();
+
+      if (!d) {
+        document.getElementById("estado-conexion").textContent =
+          "Esperando el primer dato del ESP32...";
+        return;
+      }
+
+      document.getElementById("v-nivel").textContent = d.nivel.toFixed(2) + " cm";
+      document.getElementById("v-caudal").textContent = d.caudal.toFixed(2) + " L/min";
+      document.getElementById("v-temp-amb").textContent = d.temp_ambiente.toFixed(1) + " °C";
+      document.getElementById("v-humedad").textContent = d.humedad.toFixed(1) + " %";
+      document.getElementById("v-temp-agua").textContent = d.temp_agua.toFixed(1) + " °C";
+
+      pintarEstado("led-flot-bajo", "v-flot-bajo", d.flotador_bajo, "Activo", "Normal");
+      pintarEstado("led-flot-alto", "v-flot-alto", d.flotador_alto, "Activo", "Normal");
+      pintarEstado("led-bomba", "v-bomba", d.bomba_estado, "Encendida", "Apagada");
+      pintarEstado("led-valvula", "v-valvula", d.valvula_estado, "Abierta", "Cerrada");
+
+      document.getElementById("estado-conexion").textContent =
+        "Última actualización: " + new Date(d.timestamp).toLocaleTimeString();
+    } catch (e) {
+      document.getElementById("estado-conexion").textContent = "Sin conexión con el servidor";
+    }
+  }
+
+  const ctx = document.getElementById("grafica-nivel").getContext("2d");
+  const grafica = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label: "Nivel (cm)",
+        data: [],
+        borderColor: "#0e7c86",
+        backgroundColor: "rgba(14,124,134,0.12)",
+        tension: 0.2,
+        pointRadius: 0,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { ticks: { color: "#5b6b78", maxTicksLimit: 8 }, grid: { color: "#d7dee455" } },
+        y: { ticks: { color: "#5b6b78" }, grid: { color: "#d7dee455" } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  async function actualizarGrafica() {
+    try {
+      const resp = await fetch(URL_HISTORIAL);
+      if (!resp.ok) throw new Error("Respuesta no OK");
+      const datos = await resp.json();
+
+      grafica.data.labels = datos.map(d =>
+        new Date(d.timestamp).toLocaleTimeString().slice(0, 5)
+      );
+      grafica.data.datasets[0].data = datos.map(d => d.nivel);
+      grafica.update();
+    } catch (e) {
+      console.error("Error cargando historial:", e);
+    }
+  }
+
+  function mostrarFallbackCamara() {
+    document.getElementById("img-camara").style.display = "none";
+    document.getElementById("camara-fallback").style.display = "block";
+  }
+
+  function reintentarCamara() {
+    const img = document.getElementById("img-camara");
+    document.getElementById("camara-fallback").style.display = "none";
+    img.style.display = "block";
+    img.src = URL_CAMARA + "?_=" + Date.now();
+  }
+
+  async function enviarMensaje() {
+    const nombre = document.getElementById("msg-nombre").value.trim();
+    const correo = document.getElementById("msg-correo").value.trim();
+    const contenido = document.getElementById("msg-contenido").value.trim();
+    const estado = document.getElementById("msg-estado");
+
+    if (!nombre || !correo || !contenido) {
+      estado.textContent = "Completa todos los campos.";
+      estado.style.color = "#c23b22";
+      return;
+    }
+
+    try {
+      const resp = await fetch("https://planta-backend-ifsy.onrender.com/api/mensajes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, correo, contenido })
+      });
+
+      if (!resp.ok) throw new Error("Error al enviar");
+
+      estado.textContent = "Mensaje enviado correctamente.";
+      estado.style.color = "#1f9d55";
+      document.getElementById("msg-nombre").value = "";
+      document.getElementById("msg-correo").value = "";
+      document.getElementById("msg-contenido").value = "";
+    } catch (e) {
+      estado.textContent = "No se pudo enviar el mensaje.";
+      estado.style.color = "#c23b22";
+    }
+  }
+
+  async function buscarMisMensajes() {
+    const correo = document.getElementById("buscar-correo").value.trim();
+    const cont = document.getElementById("resultado-busqueda");
+
+    if (!correo) {
+      cont.innerHTML = "<p style='color:#c23b22;'>Escribe el correo con el que enviaste tu mensaje.</p>";
+      return;
+    }
+
+    cont.innerHTML = "Buscando...";
+
+    try {
+      const resp = await fetch(
+        `https://planta-backend-ifsy.onrender.com/api/mensajes/buscar?correo=${encodeURIComponent(correo)}`
+      );
+      if (!resp.ok) throw new Error();
+      const mensajes = await resp.json();
+
+      if (mensajes.length === 0) {
+        cont.innerHTML = "<p>No encontramos mensajes con ese correo.</p>";
+        return;
+      }
+
+      cont.innerHTML = mensajes.map(m => `
+        <div class="mensaje-item">
+          <div class="meta">
+            ${new Date(m.timestamp).toLocaleString()}
+            — <span class="${m.respondido ? 'badge-respondido' : 'badge-pendiente'}">
+                ${m.respondido ? 'Respondido' : 'Pendiente'}
+              </span>
+          </div>
+          <div><strong>Tu mensaje:</strong> ${m.contenido}</div>
+          ${m.respondido
+            ? `<div style="margin-top:6px;"><strong>Respuesta:</strong> ${m.respuesta}</div>`
+            : ""
+          }
+        </div>
+      `).join("");
+    } catch (e) {
+      cont.innerHTML = "<p style='color:#c23b22;'>No se pudo buscar en este momento.</p>";
+    }
+  }
+
+  actualizarDatos();
+  actualizarGrafica();
+  setInterval(actualizarDatos, INTERVALO_MS);
+  setInterval(actualizarGrafica, 8000);
+</script>
+
+</body>
+</html>

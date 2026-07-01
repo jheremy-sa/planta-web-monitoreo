@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformación digital, Aplicando IA en Acuicultura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2f5;
+    --panel: #ffffff;
+    --border: #d7dee4;
+    --text: #16212b;
+    --muted: #5b6b78;
+    --accent: #0e7c86;
+    --accent-dark: #0b626a;
+    --ok: #1f9d55;
+    --alert: #c23b22;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+  }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  h1 { font-size: 20px; margin: 0; }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto 18px auto;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .salir {
+    background: var(--alert);
+    color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+  }
+  .secciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card h3 { margin-top: 0; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .03em; }
+  .card p { font-size: 14px; color: var(--text); }
+  button.accion {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+  }
+  button.accion:hover { background: var(--accent-dark); }
+  button.deshabilitado { background: #c7ccd1; cursor: not-allowed; }
+  a.accion {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+  }
+  .nota { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  /* ---------- Control bomba / valvula ---------- */
+  .control-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .control-fila:last-child { border-bottom: none; }
+  .control-label { font-weight: 600; font-size: 15px; }
+  .control-estado { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .switch-grupo { display: flex; gap: 8px; }
+  .btn-switch {
+    border: 1px solid var(--border);
+    background: #f7f9fa;
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .btn-switch.on-activo { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .btn-switch.off-activo { background: var(--alert); color: #fff; border-color: var(--alert); }
+
+  /* ---------- Ver planta (iframe) ---------- */
+  .planta-wrap { display: none; margin-top: 16px; }
+  .planta-wrap iframe {
+    width: 100%;
+    height: 900px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  /* ---------- Mensajes ---------- */
+  .mensaje-item {
+    background: #f7f9fa;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .mensaje-item .meta { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .mensaje-item .contenido { margin-bottom: 8px; font-size: 14px; }
+  .mensaje-item textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    resize: vertical;
+    font-family: 'Inter', sans-serif;
+  }
+  .badge-pendiente { color: #b8860b; font-weight: bold; }
+  .badge-respondido { color: var(--ok); font-weight: bold; }
+  .badge-pendiente { color: #b8860b; font-weight: bold; }
+
+  .tabla-logs { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tabla-logs th { background: #f0f3f5; color: var(--muted); text-align: left; padding: 8px 10px; font-weight: 600; border-bottom: 2px solid var(--border); }
+  .tabla-logs td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .tabla-logs tr:hover td { background: #f7f9fa; }
+  .badge-tipo { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  .badge-login { background: #d1fae5; color: #065f46; }
+  .badge-logout { background: #fee2e2; color: #991b1b; }
+  .badge-bomba_activada { background: #dcfce7; color: #166534; }
+  .badge-bomba_desactivada { background: #fef2f2; color: #dc2626; }
+  .badge-valvula_abierta { background: #dbeafe; color: #1d4ed8; }
+  .badge-valvula_cerrada { background: #e0e7ff; color: #4338ca; }
+  .badge-mensaje_publico { background: #fef9c3; color: #854d0e; }
+  .badge-respuesta_mensaje { background: #d1fae5; color: #065f46; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1 style="font-size:20px; margin:0;">Transformación digital, Aplicando IA en Acuicultura</h1>
+    <div style="font-size:13px; color:var(--muted); margin-top:2px;">Panel Administrador</div>
+  </div>
+  <button class="salir" onclick="cerrarSesion()">Cerrar sesión</button>
+</div>
+
+<div id="estado-sesion" style="text-align:center; margin-bottom:20px; color:var(--muted); font-size:14px;"></div>
+
+<div class="secciones">
+
+  <!-- Ver planta -->
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Vista de la Planta</h3>
+    <p>Mira los mismos datos y la cámara que ve el público, sin salir del panel.</p>
+    <button class="accion" id="btn-ver-planta" onclick="togglePlanta()">Ver Planta</button>
+    <div class="planta-wrap" id="planta-wrap">
+      <iframe id="iframe-planta" src="" title="Vista de la planta"></iframe>
+    </div>
+  </div>
+
+  <!-- Control de bomba / valvula -->
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Control de la Planta</h3>
+    <div id="control-planta">Cargando estado...</div>
+  </div>
+
+  <!-- Exportar -->
+  <div class="card">
+    <h3>Exportar Datos</h3>
+    <p>Descarga el historial completo de lecturas en formato CSV.</p>
+    <button class="accion" onclick="exportarCSV()">Exportar CSV</button>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Mensajes Recibidos</h3>
+    <div id="lista-mensajes">Cargando mensajes...</div>
+  </div>
+
+  <!-- Historial de actividades -->
+  <div class="card" style="grid-column: 1 / -1;">
+    <h3>Historial de Actividades</h3>
+    <div id="lista-logs">Cargando historial...</div>
+  </div>
+
+</div>
+
+<script>
+  const URL_BASE = "https://planta-backend-ifsy.onrender.com";
+  const token = localStorage.getItem("token_admin");
+
+  if (!token) {
+    window.location.href = "login.html";
+  }
+
+  async function verificarSesion() {
+    try {
+      const resp = await fetch(`${URL_BASE}/api/admin/verificar`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (!resp.ok) {
+        cerrarSesion();
+        return;
+      }
+      const datos = await resp.json();
+      document.getElementById("estado-sesion").textContent =
+        "Sesión activa: " + datos.email;
+    } catch (e) {
+      cerrarSesion();
+    }
+  }
+
+  async function cerrarSesion() {
+    await registrarLog("logout", "Cierre de sesión del administrador");
+    localStorage.removeItem("token_admin");
+    window.location.href = "login.html";
+  }
+
+  // ---------- Ver Planta (iframe) ----------
+  function togglePlanta() {
+    const wrap = document.getElementById("planta-wrap");
+    const iframe = document.getElementById("iframe-planta");
+    const btn = document.getElementById("btn-ver-planta");
+    const visible = wrap.style.display === "block";
+
+    if (visible) {
+      wrap.style.display = "none";
+      iframe.src = "";
+      btn.textContent = "Ver Planta";
+    } else {
+      iframe.src = "index.html";
+      wrap.style.display = "block";
+      btn.textContent = "Ocultar Planta";
+    }
+  }
+
+  // ---------- Exportar CSV ----------
+  async function exportarCSV() {
+    try {
+      const resp = await fetch(`${URL_BASE}/api/admin/exportar`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (!resp.ok) {
+        alert("No se pudo exportar (sesión expirada o error de servidor)");
+        return;
+      }
+      const blob = await resp.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lecturas_planta.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      alert("Error de conexión al exportar");
+    }
+  }
+
+  // ---------- Control de bomba / valvula ----------
+  let estadoComandoActual = { bomba_deseada: true, valvula_deseada: false, version: 0 };
+
+  function renderControl() {
+    const cont = document.getElementById("control-planta");
+    const b = estadoComandoActual.bomba_deseada;
+    const v = estadoComandoActual.valvula_deseada;
+
+    cont.innerHTML = `
+      <div class="control-fila">
+        <div>
+          <div class="control-label">Bomba</div>
+          <div class="control-estado">${b ? "Encendida" : "Apagada"}</div>
+        </div>
+        <div class="switch-grupo">
+          <button class="btn-switch ${b ? 'on-activo' : ''}" onclick="cambiarComando('bomba', true)">Encender</button>
+          <button class="btn-switch ${!b ? 'off-activo' : ''}" onclick="cambiarComando('bomba', false)">Apagar</button>
+        </div>
+      </div>
+      <div class="control-fila">
+        <div>
+          <div class="control-label">Electroválvula</div>
+          <div class="control-estado">${v ? "Abierta" : "Cerrada"}</div>
+        </div>
+        <div class="switch-grupo">
+          <button class="btn-switch ${v ? 'on-activo' : ''}" onclick="cambiarComando('valvula', true)">Abrir</button>
+          <button class="btn-switch ${!v ? 'off-activo' : ''}" onclick="cambiarComando('valvula', false)">Cerrar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function cargarControl() {
+    try {
+      const resp = await fetch(`${URL_BASE}/api/comando`);
+      if (!resp.ok) throw new Error();
+      estadoComandoActual = await resp.json();
+      renderControl();
+    } catch (e) {
+      document.getElementById("control-planta").innerHTML = "<p>No se pudo cargar el estado de control.</p>";
+    }
+  }
+
+  async function cambiarComando(dispositivo, nuevoValor) {
+    const body = {
+      bomba_deseada: estadoComandoActual.bomba_deseada,
+      valvula_deseada: estadoComandoActual.valvula_deseada,
+    };
+    if (dispositivo === "bomba") body.bomba_deseada = nuevoValor;
+    if (dispositivo === "valvula") body.valvula_deseada = nuevoValor;
+
+    try {
+      const resp = await fetch(`${URL_BASE}/api/admin/comando`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      if (!resp.ok) throw new Error();
+      estadoComandoActual = await resp.json();
+      const desc = dispositivo === "bomba"
+        ? `Bomba ${nuevoValor ? "activada" : "desactivada"} desde el panel`
+        : `Electroválvula ${nuevoValor ? "abierta" : "cerrada"} desde el panel`;
+      const tipoLog = dispositivo === "bomba"
+        ? (nuevoValor ? "bomba_activada" : "bomba_desactivada")
+        : (nuevoValor ? "valvula_abierta" : "valvula_cerrada");
+      await registrarLog(tipoLog, desc);
+      renderControl();
+    } catch (e) {
+      alert("No se pudo enviar el comando.");
+    }
+  }
+
+  // ---------- Mensajes ----------
+  async function cargarMensajes() {
+    const cont = document.getElementById("lista-mensajes");
+    try {
+      const resp = await fetch(`${URL_BASE}/api/admin/mensajes`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (!resp.ok) throw new Error();
+      const mensajes = await resp.json();
+
+      if (mensajes.length === 0) {
+        cont.innerHTML = "<p>No hay mensajes todavía.</p>";
+        return;
+      }
+
+      cont.innerHTML = mensajes.map(m => `
+        <div class="mensaje-item">
+          <div class="meta">
+            ${m.nombre} (${m.correo}) — ${new Date(m.timestamp).toLocaleString()}
+            — <span class="${m.respondido ? 'badge-respondido' : 'badge-pendiente'}">
+                ${m.respondido ? 'Respondido' : 'Pendiente'}
+              </span>
+          </div>
+          <div class="contenido"><strong>Mensaje:</strong> ${m.contenido}</div>
+          ${m.respondido
+            ? `<div class="contenido"><strong>Respuesta:</strong> ${m.respuesta}</div>`
+            : `<textarea id="resp-${m.id}" rows="2" placeholder="Escribe tu respuesta..."></textarea>
+               <button class="accion" onclick="responderMensaje(${m.id})">Enviar respuesta</button>`
+          }
+        </div>
+      `).join("");
+
+    } catch (e) {
+      cont.innerHTML = "<p>Error cargando mensajes.</p>";
+    }
+  }
+
+  async function responderMensaje(id) {
+    const textarea = document.getElementById(`resp-${id}`);
+    const respuesta = textarea.value.trim();
+    if (!respuesta) {
+      alert("Escribe una respuesta antes de enviar.");
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${URL_BASE}/api/admin/mensajes/${id}/responder`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ respuesta })
+      });
+      if (!resp.ok) throw new Error();
+      await registrarLog(
+        "respuesta_mensaje",
+        `Respuesta enviada al mensaje #${id}`,
+        respuesta.substring(0, 150)
+      );
+      cargarMensajes();
+      cargarLogs();
+    } catch (e) {
+      alert("Error al enviar la respuesta.");
+    }
+  }
+
+  // ---------- Registro de actividades ----------
+  async function registrarLog(tipo, descripcion, datos_extra = null) {
+    try {
+      await fetch(`${URL_BASE}/api/admin/log`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ tipo, descripcion, datos_extra })
+      });
+    } catch (e) {
+      // Si falla el log, no interrumpir la accion principal
+    }
+  }
+
+  async function cargarLogs() {
+    const cont = document.getElementById("lista-logs");
+    try {
+      const resp = await fetch(`${URL_BASE}/api/admin/logs`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (!resp.ok) throw new Error();
+      const logs = await resp.json();
+
+      if (logs.length === 0) {
+        cont.innerHTML = "<p>No hay actividad registrada todavía.</p>";
+        return;
+      }
+
+      const tipoLabel = {
+        login: "Inicio sesión", logout: "Cierre sesión",
+        bomba_activada: "Bomba ON", bomba_desactivada: "Bomba OFF",
+        valvula_abierta: "Válvula abierta", valvula_cerrada: "Válvula cerrada",
+        mensaje_publico: "Mensaje público", respuesta_mensaje: "Respuesta enviada"
+      };
+
+      cont.innerHTML = `
+        <div style="overflow-x:auto;">
+          <table class="tabla-logs">
+            <thead>
+              <tr>
+                <th>Fecha y hora</th>
+                <th>Acción</th>
+                <th>Descripción</th>
+                <th>Usuario/Admin</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logs.map(l => `
+                <tr>
+                  <td class="mono" style="white-space:nowrap;">${new Date(l.timestamp).toLocaleString()}</td>
+                  <td><span class="badge-tipo badge-${l.tipo}">${tipoLabel[l.tipo] || l.tipo}</span></td>
+                  <td>${l.descripcion}</td>
+                  <td>${l.admin_email || '—'}</td>
+                  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${l.datos_extra || '—'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch (e) {
+      cont.innerHTML = "<p>Error cargando el historial.</p>";
+    }
+  }
+
+  // ---------- Inicio ----------
+  verificarSesion();
+  cargarControl();
+  cargarMensajes();
+  cargarLogs();
+</script>
+
+</body>
+</html>

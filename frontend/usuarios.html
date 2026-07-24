@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Usuarios — HMI Acuicultura UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="assets/js/common.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" class="logo-img" alt="Acuicultura">
+    <div class="logo-text"><div class="nombre">ACUICULTURA DIGITAL</div>
+    <div class="sub">Transformación Digital · Acuicultura UPSE</div></div>
+  </a>
+  <nav>
+    <a href="hmi.html"><i class="fa-solid fa-gauge-high"></i> Planta</a>
+    <a href="historial.html"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
+    <a href="comentarios.html"><i class="fa-solid fa-comments"></i> Comentarios</a>
+    <a href="usuarios.html" class="activo"><i class="fa-solid fa-users"></i> Usuarios</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="spacer"></div>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <span class="dot"></span>
+      <span id="userLabel">—</span>
+      <span class="role-badge pro">Supervisor</span>
+    </div>
+    <button class="icon-btn" onclick="abrirPanelConfig()" title="Configuración" style="color:#c5d0da">
+      <i class="fa-solid fa-gear"></i>
+    </button>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span class="logout-text">Cerrar sesión</span>
+    </button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="flex between mb-2">
+    <h2 style="margin:0;display:flex;align-items:center;gap:10px">
+      <i class="fa-solid fa-users" style="color:var(--accent)"></i> Gestión de Usuarios
+    </h2>
+    <button class="btn primary" onclick="abrirCrear()">
+      <i class="fa-solid fa-user-plus"></i> Nuevo usuario
+    </button>
+  </div>
+  <div id="alertTop"></div>
+  <div class="card">
+    <div id="listaUsers"><div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+  </div>
+</div>
+
+<!-- Modal crear -->
+<div class="modal-overlay" id="modalCrear" style="display:none" onclick="cerrarCrear(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-user-plus"></i> Nuevo Usuario</h3>
+      <button class="btn-close" onclick="cerrarCrear()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="crearAlert"></div>
+      <div class="gap-6">
+        <div class="field"><label><i class="fa-solid fa-envelope"></i> Correo</label>
+          <input type="email" id="nEmail" placeholder="usuario@planta.local"></div>
+        <div class="field"><label><i class="fa-solid fa-user"></i> Nombre de usuario</label>
+          <input type="text" id="nUser" placeholder="Operador1"></div>
+        <div class="field"><label><i class="fa-solid fa-lock"></i> Contraseña inicial</label>
+          <input type="password" id="nPwd" placeholder="Mínimo 8 caracteres"></div>
+        <div class="field"><label><i class="fa-solid fa-shield-halved"></i> Rol</label>
+          <select id="nRol">
+            <option value="admin">Operador (control, sin gestión de usuarios)</option>
+            <option value="admin_pro">Supervisor (control total)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarCrear()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      <button class="btn primary" onclick="crearUsuario()">
+        <i class="fa-solid fa-floppy-disk"></i> Crear usuario
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL='https://planta-backend-ifsy.onrender.com';
+const TK=localStorage.getItem('hmi_token');
+const ROL=localStorage.getItem('hmi_role');
+if(!TK||ROL!=='admin_pro'){location.href='login.html';}
+document.getElementById('userLabel').textContent=localStorage.getItem('hmi_username')||'?';
+
+async function api(path,opts={}) {
+  opts.headers={...(opts.headers||{}),'Authorization':'Bearer '+TK,'Content-Type':'application/json'};
+  const r=await fetch(URL+path,opts);
+  if(r.status===401){location.href='login.html';return null;}
+  return r.json();
+}
+function alerta(id,msg,tipo='danger') {
+  document.getElementById(id).innerHTML=msg
+    ?`<div class="alert ${tipo}"><i class="fa-solid ${tipo==='success'?'fa-circle-check':'fa-triangle-exclamation'}"></i><span>${msg}</span></div>`
+    :'';
+}
+
+async function cargarUsuarios() {
+  const lista=await api('/api/usuarios'); if(!lista) return;
+  document.getElementById('listaUsers').innerHTML=`
+    <table class="tabla">
+      <thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último login</th><th>Acciones</th></tr></thead>
+      <tbody>${lista.map(u=>`
+        <tr>
+          <td style="font-weight:700"><i class="fa-solid fa-user" style="color:var(--muted);margin-right:6px"></i>${u.username}</td>
+          <td style="font-size:12px;color:var(--muted)">${u.email}</td>
+          <td><span class="badge ${u.role==='admin_pro'?'cyan':'gray'}">
+            <i class="fa-solid ${u.role==='admin_pro'?'fa-crown':'fa-user'}"></i>
+            ${u.role==='admin_pro'?'Supervisor':'Operador'}
+          </span></td>
+          <td><span class="badge ${u.is_active?'green':'red'}">
+            <i class="fa-solid ${u.is_active?'fa-circle-check':'fa-circle-xmark'}"></i>
+            ${u.is_active?'Activo':'Suspendido'}
+          </span></td>
+          <td style="font-size:11px;color:var(--muted)">
+            ${u.last_login?'<i class="fa-regular fa-clock"></i> '+new Date(u.last_login).toLocaleString():'Nunca'}
+          </td>
+          <td>
+            <div class="flex wrap" style="gap:6px">
+              <button class="btn sm" onclick="resetPwd(${u.id},'${u.username}')">
+                <i class="fa-solid fa-key"></i> Reset pwd
+              </button>
+              <button class="btn sm ${u.is_active?'danger':'success'}" onclick="toggleActivo(${u.id},${!u.is_active})">
+                <i class="fa-solid ${u.is_active?'fa-ban':'fa-circle-check'}"></i>
+                ${u.is_active?'Suspender':'Activar'}
+              </button>
+              <select class="btn sm" onchange="cambiarRol(${u.id},this.value)">
+                <option value="">Cambiar rol</option>
+                <option value="admin"><i class="fa-solid fa-user"></i> → Admin</option>
+                <option value="admin_pro">→ Supervisor</option>
+              </select>
+            </div>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function resetPwd(uid,nombre) {
+  if(!confirm(`¿Resetear contraseña de ${nombre}?`)) return;
+  const d=await api(`/api/usuarios/${uid}/reset-password`,{method:'POST'});
+  if(d) alerta('alertTop',
+    `Contraseña temporal de ${nombre}: <strong style="font-family:monospace;font-size:15px;letter-spacing:2px">${d.temp_password}</strong> — Válida 24 h. El usuario la recibirá en sus notificaciones.`,
+    'success');
+}
+async function toggleActivo(uid,activo) {
+  await api(`/api/usuarios/${uid}`,{method:'PUT',body:JSON.stringify({is_active:activo})});
+  function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarUsuarios();
+}
+async function cambiarRol(uid,rol) {
+  if(!rol) return;
+  await api(`/api/usuarios/${uid}`,{method:'PUT',body:JSON.stringify({role:rol})});
+  alerta('alertTop','Rol actualizado correctamente.','success');
+  function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarUsuarios();
+}
+function abrirCrear(){document.getElementById('modalCrear').style.display='flex';}
+function cerrarCrear(e){if(!e||e.target.id==='modalCrear')document.getElementById('modalCrear').style.display='none';}
+async function crearUsuario() {
+  const email=document.getElementById('nEmail').value.trim();
+  const user=document.getElementById('nUser').value.trim();
+  const pwd=document.getElementById('nPwd').value;
+  const rol=document.getElementById('nRol').value;
+  if(!email||!user||!pwd){alerta('crearAlert','Completa todos los campos.');return;}
+  if(pwd.length<8){alerta('crearAlert','Mínimo 8 caracteres en la contraseña.');return;}
+  const d=await api('/api/usuarios',{method:'POST',body:JSON.stringify({email,username:user,password:pwd,role:rol})});
+  if(d&&d.id){
+    alerta('crearAlert','Usuario creado correctamente.','success');
+    setTimeout(()=>{cerrarCrear();function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarUsuarios();},1000);
+  } else if(d) alerta('crearAlert',d.detail||'Error al crear usuario.');
+}
+async function cerrarSesion() {
+  await fetch(URL+'/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+TK}}).catch(()=>{});
+  localStorage.clear();location.href='login.html';
+}
+function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarUsuarios();
+
+iniciarReloj();
+</script>
+</body>
+</html>

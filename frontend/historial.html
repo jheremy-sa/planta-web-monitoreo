@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historial — HMI UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="assets/js/common.js"></script>
+<style>
+.filter-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:7000;display:none;backdrop-filter:blur(2px)}
+.filter-panel{position:fixed;top:0;right:-440px;width:420px;height:100vh;background:var(--panel);
+  border-left:1px solid var(--border2);box-shadow:-12px 0 40px rgba(0,0,0,.4);z-index:7001;
+  display:flex;flex-direction:column;transition:right .3s ease;overflow:hidden}
+.filter-panel.open{right:0}
+.filter-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.filter-head h3{margin:0;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.filter-head h3 i{color:var(--accent)}
+.filter-body{flex:1;overflow-y:auto;padding:16px 20px}
+.filter-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.filter-grupo{margin-bottom:16px}
+.filter-grupo-titulo{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;
+  padding-bottom:6px;border-bottom:1px solid var(--border)}
+.filter-grupo-titulo i{color:var(--accent);font-size:12px}
+.filter-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;
+  font-size:11px;font-weight:600;cursor:pointer;transition:.15s;border:1px solid var(--border2);
+  background:var(--panel2);color:var(--muted);user-select:none}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.activo{background:rgba(20,184,166,.15);border-color:var(--accent);color:var(--accent)}
+.chip i.fa-circle{font-size:8px}
+.periodo-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.periodo-btn{padding:5px 11px;border-radius:7px;font-size:11px;font-weight:600;
+  border:1px solid var(--border2);background:var(--panel2);color:var(--muted);cursor:pointer;transition:.15s}
+.periodo-btn:hover{border-color:var(--accent);color:var(--text)}
+.periodo-btn.activo{background:rgba(20,184,166,.15);border-color:var(--accent);color:var(--accent)}
+.date-range{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.date-range input{padding:7px 10px;border:1px solid var(--border2);border-radius:7px;
+  background:var(--bg2);color:var(--text);width:100%;font-size:12px}
+.results-bar{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;background:var(--panel2);border-radius:8px;margin-bottom:12px;
+  font-size:12px;flex-wrap:wrap;gap:8px}
+.results-bar .count{font-weight:700;color:var(--accent)}
+.tag-filtro{background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);
+  color:var(--accent);font-size:10px;padding:2px 7px;border-radius:999px;font-weight:600}
+@media(max-width:480px){.filter-panel{width:100%;right:-100%}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="icon-btn hamburger" onclick="toggleNav()"><i class="fa-solid fa-bars"></i></button>
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" class="logo-img" alt="Acuicultura">
+    <div class="logo-text"><div class="nombre">ACUICULTURA DIGITAL</div><div class="sub">Acuicultura UPSE</div></div>
+  </a>
+  <nav id="topNav">
+    <a href="hmi.html"><i class="fa-solid fa-gauge-high"></i> Planta</a>
+    <a href="historial.html" class="activo"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
+    <a href="comentarios.html"><i class="fa-solid fa-comments"></i> Comentarios</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <span class="dot"></span>
+      <span id="userLabel">—</span>
+      <span class="role-badge" id="roleLabel">—</span>
+    </div>
+    <button class="icon-btn" onclick="abrirPanelConfig()" title="Configuración" style="color:#c5d0da">
+      <i class="fa-solid fa-gear"></i>
+    </button>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span class="logout-text">Cerrar sesión</span>
+    </button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="flex between mb-2 wrap" style="gap:10px">
+    <h2 style="margin:0;display:flex;align-items:center;gap:9px">
+      <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i> Historial
+    </h2>
+    <div class="flex wrap" style="gap:8px">
+      <button class="btn primary" onclick="abrirFiltros()">
+        <i class="fa-solid fa-sliders"></i> Filtrar
+      </button>
+      <button class="btn success" onclick="descargarVista()">
+        <i class="fa-solid fa-download"></i> Descargar lo que se ve
+      </button>
+      <button class="btn" onclick="descargarTodo()">
+        <i class="fa-solid fa-file-export"></i> Descargar todo
+      </button>
+    </div>
+  </div>
+
+  <div id="resultsBar" class="results-bar" style="display:none">
+    <div>
+      Mostrando <span class="count" id="countVisible">0</span> registro(s)
+      <span id="tagsFiltros" style="display:inline-flex;gap:5px;flex-wrap:wrap;margin-left:8px"></span>
+    </div>
+    <button class="btn sm" onclick="limpiarFiltros()">
+      <i class="fa-solid fa-xmark"></i> Limpiar filtros
+    </button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn activo" onclick="cambiarTab('actividades',this)">
+      <i class="fa-solid fa-list-check"></i> Actividades del sistema
+    </button>
+    <button class="tab-btn" onclick="cambiarTab('sensores',this)">
+      <i class="fa-solid fa-microchip"></i> Lecturas de sensores
+    </button>
+  </div>
+
+  <!-- TAB: ACTIVIDADES -->
+  <div class="tab-pane activo" id="tab-actividades">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="overflow-x:auto">
+        <div id="listaAudit">
+          <div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SENSORES -->
+  <div class="tab-pane" id="tab-sensores">
+    <!-- Sub-filtros rápidos de sensores -->
+    <div class="card mb-2">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-filter"></i> Seleccionar variables</h3>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <span style="font-size:11px;color:var(--muted);align-self:center;font-weight:700">PLANTA 1:</span>
+        <label class="chip activo" data-sensor="p1_nivel"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-water"></i> Nivel</label>
+        <label class="chip activo" data-sensor="p1_caudal"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-gauge"></i> Caudal</label>
+        <label class="chip activo" data-sensor="p1_temp_ambiente"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-thermometer-half"></i> Temp. Ambiente</label>
+        <label class="chip activo" data-sensor="p1_humedad"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-droplet"></i> Humedad</label>
+        <label class="chip activo" data-sensor="p1_temp_agua"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-temperature-quarter"></i> Temp. Agua</label>
+        <label class="chip activo" data-sensor="p1_bomba"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-water-ladder"></i> Bomba</label>
+        <label class="chip activo" data-sensor="p1_valvula"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-faucet"></i> Válvula</label>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <span style="font-size:11px;color:var(--muted);align-self:center;font-weight:700">PLANTA 2:</span>
+        <label class="chip activo" data-sensor="p2_nivel"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-water"></i> Nivel</label>
+        <label class="chip activo" data-sensor="p2_caudal"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-gauge"></i> Caudal</label>
+        <label class="chip activo" data-sensor="p2_bomba"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-water-ladder"></i> Bomba</label>
+        <label class="chip activo" data-sensor="p2_valvula"><i class="fa-solid fa-circle"></i><i class="fa-solid fa-faucet"></i> Válvula</label>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--muted);font-weight:700"><i class="fa-solid fa-calendar"></i> Período:</span>
+        <button class="periodo-btn" onclick="setSensorPeriodo('1h',this)">1 hora</button>
+        <button class="periodo-btn activo" onclick="setSensorPeriodo('6h',this)">6 horas</button>
+        <button class="periodo-btn" onclick="setSensorPeriodo('24h',this)">24 horas</button>
+        <button class="periodo-btn" onclick="setSensorPeriodo('7d',this)">7 días</button>
+        <button class="periodo-btn" onclick="setSensorPeriodo('30d',this)">30 días</button>
+        <button class="btn primary sm" onclick="cargarSensores()">
+          <i class="fa-solid fa-filter"></i> Aplicar
+        </button>
+        <button class="btn success sm" onclick="descargarSensores()">
+          <i class="fa-solid fa-download"></i> Descargar CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="overflow-x:auto">
+        <div id="listaSensores">
+          <div class="no-data"><i class="fa-solid fa-arrow-up" style="margin-right:6px"></i>Selecciona variables y presiona Aplicar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL DE FILTROS ══════════════════════════════════════════ -->
+<div class="filter-backdrop" id="filterBackdrop" onclick="cerrarFiltros()"></div>
+<div class="filter-panel" id="filterPanel">
+  <div class="filter-head">
+    <h3><i class="fa-solid fa-sliders"></i> Filtrar actividades</h3>
+    <button class="btn-close" onclick="cerrarFiltros()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="filter-body">
+    <!-- Paso 1: Tipo de evento -->
+    <div class="filter-grupo">
+      <div class="filter-grupo-titulo"><i class="fa-solid fa-list-check"></i> Paso 1 — ¿Qué eventos?</div>
+      <div style="margin-bottom:10px">
+        <button class="chip activo" id="chipTodo" onclick="toggleTodo()">
+          <i class="fa-solid fa-check-double"></i> Seleccionar todo
+        </button>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px"><i class="fa-solid fa-right-to-bracket" style="color:var(--green)"></i> ACCESO</div>
+        <div class="filter-chips">
+          <label class="chip activo" data-accion="login"><i class="fa-solid fa-circle"></i> Login</label>
+          <label class="chip activo" data-accion="logout"><i class="fa-solid fa-circle"></i> Logout</label>
+          <label class="chip activo" data-accion="login_fallido"><i class="fa-solid fa-circle"></i> Intento fallido</label>
+          <label class="chip activo" data-accion="cambio_password"><i class="fa-solid fa-circle"></i> Cambio contraseña</label>
+          <label class="chip activo" data-accion="solicitud_reset"><i class="fa-solid fa-circle"></i> Reset contraseña</label>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px"><i class="fa-solid fa-sliders" style="color:var(--accent)"></i> CONTROL</div>
+        <div class="filter-chips">
+          <label class="chip activo" data-accion="control_p1"><i class="fa-solid fa-circle"></i> Planta 1</label>
+          <label class="chip activo" data-accion="control_p2"><i class="fa-solid fa-circle"></i> Planta 2</label>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px"><i class="fa-solid fa-users" style="color:var(--purple)"></i> USUARIOS</div>
+        <div class="filter-chips">
+          <label class="chip activo" data-accion="crear_usuario"><i class="fa-solid fa-circle"></i> Crear usuario</label>
+          <label class="chip activo" data-accion="actualizar_usuario"><i class="fa-solid fa-circle"></i> Actualizar usuario</label>
+          <label class="chip activo" data-accion="reset_password"><i class="fa-solid fa-circle"></i> Reset password</label>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px"><i class="fa-solid fa-comments" style="color:var(--blue)"></i> COMENTARIOS</div>
+        <div class="filter-chips">
+          <label class="chip activo" data-accion="comentario"><i class="fa-solid fa-circle"></i> Solicitud enviada</label>
+          <label class="chip activo" data-accion="responder_comentario"><i class="fa-solid fa-circle"></i> Solicitud respondida</label>
+          <label class="chip activo" data-accion="permiso_editor"><i class="fa-solid fa-circle"></i> Token generado</label>
+          <label class="chip activo" data-accion="usar_token_editor"><i class="fa-solid fa-circle"></i> Token usado</label>
+        </div>
+      </div>
+    </div>
+    <!-- Paso 2: Período -->
+    <div class="filter-grupo">
+      <div class="filter-grupo-titulo"><i class="fa-solid fa-calendar-days"></i> Paso 2 — ¿Período?</div>
+      <div class="periodo-btns">
+        <button class="periodo-btn" onclick="setPeriodo('hoy',this)"><i class="fa-solid fa-sun"></i> Hoy</button>
+        <button class="periodo-btn" onclick="setPeriodo('7d',this)">7 días</button>
+        <button class="periodo-btn" onclick="setPeriodo('30d',this)">30 días</button>
+        <button class="periodo-btn activo" onclick="setPeriodo('todo',this)"><i class="fa-solid fa-infinity"></i> Todo</button>
+        <button class="periodo-btn" onclick="setPeriodo('custom',this)"><i class="fa-solid fa-calendar"></i> Personalizado</button>
+      </div>
+      <div class="date-range" id="dateRange" style="display:none">
+        <div><label style="font-size:10px;color:var(--muted);font-weight:700">Desde</label>
+          <input type="date" id="filtroDesde"></div>
+        <div><label style="font-size:10px;color:var(--muted);font-weight:700">Hasta</label>
+          <input type="date" id="filtroHasta"></div>
+      </div>
+    </div>
+    <!-- Paso 3: Usuario -->
+    <div class="filter-grupo">
+      <div class="filter-grupo-titulo"><i class="fa-solid fa-user"></i> Paso 3 — ¿Usuario? (opcional)</div>
+      <select id="filtroUsuario" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px">
+        <option value="">Todos los usuarios</option>
+      </select>
+    </div>
+  </div>
+  <div class="filter-foot">
+    <button class="btn" onclick="limpiarFiltros()" style="flex:0 0 auto"><i class="fa-solid fa-rotate-left"></i> Limpiar</button>
+    <button class="btn primary" onclick="aplicarFiltros()" style="flex:1"><i class="fa-solid fa-filter"></i> Aplicar filtro</button>
+    <button class="btn success" onclick="descargarVista()" style="flex:0 0 auto"><i class="fa-solid fa-download"></i> CSV</button>
+  </div>
+</div>
+
+<script>
+const URL_B='https://planta-backend-ifsy.onrender.com';
+const TK=localStorage.getItem('hmi_token');
+const ROL=localStorage.getItem('hmi_role');
+if(!TK) location.href='login.html';
+document.getElementById('userLabel').textContent=localStorage.getItem('hmi_username')||'?';
+document.getElementById('roleLabel').textContent=ROL==='admin_pro'?'Supervisor':'Operador';
+if(ROL==='admin_pro') document.getElementById('roleLabel').classList.add('pro');
+function toggleNav(){document.getElementById('topNav').classList.toggle('open');}
+
+let todosLosRegistros=[], registrosFiltrados=[], periodoActivo='todo';
+let sensorPeriodoMin=360; // 6 horas default
+let sensorRegistros=[];
+
+async function apiFetch(path,opts={}){
+  opts.headers={...(opts.headers||{}),'Authorization':'Bearer '+TK};
+  const r=await fetch(URL_B+path,opts);
+  if(r.status===401){location.href='login.html';return null;}
+  const ct=r.headers.get('content-type')||'';
+  return ct.includes('json')?r.json():r;
+}
+
+// ── TABS ─────────────────────────────────────────────────────
+function cambiarTab(id, btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('activo'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('activo'));
+  btn.classList.add('activo');
+  document.getElementById('tab-'+id).classList.add('activo');
+  if(id==='sensores' && sensorRegistros.length===0) cargarSensores();
+}
+
+// ── ACTIVIDADES ───────────────────────────────────────────────
+const ICONS={login:'fa-right-to-bracket',logout:'fa-right-from-bracket',login_fallido:'fa-triangle-exclamation',
+  control_p1:'fa-sliders',control_p2:'fa-sliders',crear_usuario:'fa-user-plus',
+  actualizar_usuario:'fa-user-pen',reset_password:'fa-key',permiso_editor:'fa-unlock',
+  usar_token_editor:'fa-circle-check',comentario:'fa-comment',responder_comentario:'fa-reply',
+  cambio_password:'fa-key',solicitud_reset:'fa-envelope'};
+const COLORS={login:'var(--green)',logout:'var(--muted)',login_fallido:'var(--red)',
+  control_p1:'var(--accent)',control_p2:'#b87333',crear_usuario:'var(--purple)',
+  reset_password:'var(--yellow)',comentario:'var(--blue)',responder_comentario:'var(--green)',
+  permiso_editor:'var(--purple)',cambio_password:'var(--yellow)'};
+
+async function cargarTodos(){
+  document.getElementById('listaAudit').innerHTML='<div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
+  const datos=await apiFetch('/api/audit?limit=500');
+  if(!datos)return;
+  todosLosRegistros=datos;
+  const usuarios=[...new Set(datos.map(r=>r.usuario).filter(Boolean))].sort();
+  const sel=document.getElementById('filtroUsuario');
+  usuarios.forEach(u=>{const o=document.createElement('option');o.value=u;o.textContent=u;sel.appendChild(o);});
+  aplicarFiltros();
+}
+
+function renderTablaAudit(lista){
+  if(!lista.length){
+    document.getElementById('listaAudit').innerHTML='<div class="no-data"><i class="fa-solid fa-magnifying-glass"></i><br>No hay registros con estos filtros</div>';
+    return;
+  }
+  document.getElementById('listaAudit').innerHTML=`
+    <table class="tabla">
+      <thead><tr>
+        <th style="min-width:160px">Fecha y hora</th>
+        <th style="min-width:160px">Evento</th>
+        <th style="min-width:150px">Usuario</th>
+        <th style="min-width:200px">Descripción</th>
+      </tr></thead>
+      <tbody>${lista.map(r=>`
+        <tr>
+          <td class="font-mono" style="font-size:11px;white-space:nowrap;color:var(--muted)">
+            <i class="fa-regular fa-clock"></i> ${new Date(r.timestamp).toLocaleString()}
+          </td>
+          <td>
+            <span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap">
+              <i class="fa-solid ${ICONS[r.accion]||'fa-circle-dot'}" style="color:${COLORS[r.accion]||'var(--muted)'}"></i>
+              <span style="font-size:11px;color:var(--muted)">${r.accion}</span>
+            </span>
+          </td>
+          <td style="font-size:12px;white-space:nowrap">${r.usuario||'<em style="color:var(--muted)">sistema</em>'}</td>
+          <td style="font-size:12px">${r.descripcion}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function aplicarFiltros(){
+  const chipsActivos=[...document.querySelectorAll('.chip[data-accion].activo')].map(c=>c.dataset.accion);
+  let desde=null,hasta=null;
+  const ahora=new Date();
+  if(periodoActivo==='hoy'){desde=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate());hasta=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate(),23,59,59);}
+  else if(periodoActivo==='7d') desde=new Date(ahora-7*86400000);
+  else if(periodoActivo==='30d') desde=new Date(ahora-30*86400000);
+  else if(periodoActivo==='custom'){
+    const d=document.getElementById('filtroDesde').value,h=document.getElementById('filtroHasta').value;
+    if(d)desde=new Date(d+'T00:00:00');if(h)hasta=new Date(h+'T23:59:59');
+  }
+  const usr=document.getElementById('filtroUsuario').value;
+  registrosFiltrados=todosLosRegistros.filter(r=>{
+    if(!chipsActivos.includes(r.accion))return false;
+    const ts=new Date(r.timestamp);
+    if(desde&&ts<desde)return false;if(hasta&&ts>hasta)return false;
+    if(usr&&r.usuario!==usr)return false;return true;
+  });
+  renderTablaAudit(registrosFiltrados);
+  const bar=document.getElementById('resultsBar');
+  bar.style.display='flex';
+  document.getElementById('countVisible').textContent=registrosFiltrados.length;
+  const tags=[];
+  if(periodoActivo==='hoy')tags.push('Hoy');if(periodoActivo==='7d')tags.push('7 días');
+  if(periodoActivo==='30d')tags.push('30 días');
+  if(periodoActivo==='custom'){const d=document.getElementById('filtroDesde').value,h=document.getElementById('filtroHasta').value;if(d||h)tags.push((d||'?')+' → '+(h||'?'));}
+  if(usr)tags.push('👤 '+usr);
+  if(chipsActivos.length<document.querySelectorAll('.chip[data-accion]').length)
+    tags.push(chipsActivos.length+' tipo(s)');
+  document.getElementById('tagsFiltros').innerHTML=tags.map(t=>`<span class="tag-filtro">${t}</span>`).join('');
+  cerrarFiltros();
+}
+
+// ── SENSORES ──────────────────────────────────────────────────
+function setSensorPeriodo(p, btn){
+  sensorPeriodoMin={
+    '1h':60,'6h':360,'24h':1440,'7d':10080,'30d':43200
+  }[p]||360;
+  document.querySelectorAll('[onclick^="setSensorPeriodo"]').forEach(b=>b.classList.remove('activo'));
+  if(btn)btn.classList.add('activo');
+}
+
+async function cargarSensores(){
+  document.getElementById('listaSensores').innerHTML=
+    '<div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Cargando lecturas...</div>';
+
+  const sensoresActivos=[...document.querySelectorAll('.chip[data-sensor].activo')].map(c=>c.dataset.sensor);
+  if(!sensoresActivos.length){
+    document.getElementById('listaSensores').innerHTML='<div class="no-data">Selecciona al menos una variable</div>';
+    return;
+  }
+
+  const tieneP1=sensoresActivos.some(s=>s.startsWith('p1_'));
+  const tieneP2=sensoresActivos.some(s=>s.startsWith('p2_'));
+
+  const [datosP1,datosP2]=await Promise.all([
+    tieneP1?apiFetch(`/api/lecturas/historial?minutos=${sensorPeriodoMin}`):Promise.resolve([]),
+    tieneP2?apiFetch(`/api/lecturas/planta2/historial?minutos=${sensorPeriodoMin}`):Promise.resolve([])
+  ]);
+
+  // Combinar con etiqueta de planta
+  let combinado=[];
+  if(tieneP1&&datosP1) combinado.push(...datosP1.map(r=>({...r,_planta:'P1'})));
+  if(tieneP2&&datosP2) combinado.push(...datosP2.map(r=>({...r,_planta:'P2'})));
+  combinado.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  sensorRegistros=combinado;
+
+  if(!combinado.length){
+    document.getElementById('listaSensores').innerHTML=
+      '<div class="no-data"><i class="fa-solid fa-magnifying-glass"></i><br>No hay lecturas en este período</div>';
+    return;
+  }
+
+  // Columnas según selección
+  const colsP1=[
+    {key:'nivel',label:'Nivel (cm)',when:'p1_nivel'},
+    {key:'caudal',label:'Caudal (L/min)',when:'p1_caudal'},
+    {key:'temp_ambiente',label:'Temp. Amb. (°C)',when:'p1_temp_ambiente'},
+    {key:'humedad',label:'Humedad (%)',when:'p1_humedad'},
+    {key:'temp_agua',label:'Temp. Agua (°C)',when:'p1_temp_agua'},
+    {key:'bomba_estado',label:'Bomba',when:'p1_bomba',bool:true},
+    {key:'valvula_estado',label:'Válvula',when:'p1_valvula',bool:true},
+  ].filter(c=>sensoresActivos.includes(c.when));
+
+  const colsP2=[
+    {key:'nivel',label:'Nivel P2 (cm)',when:'p2_nivel'},
+    {key:'caudal',label:'Caudal P2 (L/min)',when:'p2_caudal'},
+    {key:'bomba_estado',label:'Bomba P2',when:'p2_bomba',bool:true},
+    {key:'valvula_estado',label:'Válvula P2',when:'p2_valvula',bool:true},
+  ].filter(c=>sensoresActivos.includes(c.when));
+
+  document.getElementById('listaSensores').innerHTML=`
+    <table class="tabla">
+      <thead><tr>
+        <th style="min-width:160px">Fecha y hora</th>
+        <th style="min-width:60px">Planta</th>
+        ${colsP1.map(c=>`<th style="min-width:110px">${c.label}</th>`).join('')}
+        ${colsP2.map(c=>`<th style="min-width:110px">${c.label}</th>`).join('')}
+      </tr></thead>
+      <tbody>${combinado.map(r=>{
+        const esP1=r._planta==='P1';
+        return `<tr>
+          <td class="font-mono" style="font-size:11px;white-space:nowrap;color:var(--muted)">
+            <i class="fa-regular fa-clock"></i> ${new Date(r.timestamp).toLocaleString()}
+          </td>
+          <td>
+            <span class="badge ${esP1?'cyan':''}">
+              <i class="fa-solid fa-${esP1?'wifi':'microchip'}"></i> ${r._planta}
+            </span>
+          </td>
+          ${colsP1.map(c=>`<td style="font-size:12px;font-family:monospace">
+            ${esP1?(c.bool?(r[c.key]
+              ?'<span class="badge green"><i class="fa-solid fa-circle-check"></i> ON</span>'
+              :'<span class="badge gray">OFF</span>')
+              :r[c.key]?.toFixed(2)??'—'):'<span style="color:var(--border2)">—</span>'}
+          </td>`).join('')}
+          ${colsP2.map(c=>`<td style="font-size:12px;font-family:monospace">
+            ${!esP1?(c.bool?(r[c.key]
+              ?'<span class="badge green"><i class="fa-solid fa-circle-check"></i> ON</span>'
+              :'<span class="badge gray">OFF</span>')
+              :r[c.key]?.toFixed(2)??'—'):'<span style="color:var(--border2)">—</span>'}
+          </td>`).join('')}
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>`;
+}
+
+function descargarSensores(){
+  if(!sensorRegistros.length){alert('Primero carga las lecturas con el botón Aplicar.');return;}
+  const sensoresActivos=[...document.querySelectorAll('.chip[data-sensor].activo')].map(c=>c.dataset.sensor);
+  const cabecera=['Fecha','Planta'];
+  const sensorMap={
+    p1_nivel:'Nivel(cm)',p1_caudal:'Caudal(L/min)',p1_temp_ambiente:'Temp.Amb(°C)',
+    p1_humedad:'Humedad(%)',p1_temp_agua:'Temp.Agua(°C)',p1_bomba:'Bomba',p1_valvula:'Valvula',
+    p2_nivel:'Nivel P2(cm)',p2_caudal:'Caudal P2(L/min)',p2_bomba:'Bomba P2',p2_valvula:'Valvula P2'
+  };
+  const keyMap={
+    p1_nivel:'nivel',p1_caudal:'caudal',p1_temp_ambiente:'temp_ambiente',p1_humedad:'humedad',
+    p1_temp_agua:'temp_agua',p1_bomba:'bomba_estado',p1_valvula:'valvula_estado',
+    p2_nivel:'nivel',p2_caudal:'caudal',p2_bomba:'bomba_estado',p2_valvula:'valvula_estado'
+  };
+  sensoresActivos.forEach(s=>cabecera.push(sensorMap[s]||s));
+  const filas=[cabecera];
+  sensorRegistros.forEach(r=>{
+    const fila=[new Date(r.timestamp).toLocaleString(),r._planta];
+    sensoresActivos.forEach(s=>{
+      const key=keyMap[s];const prefijo=s.startsWith('p1_')?'P1':'P2';
+      if(r._planta!==prefijo){fila.push('');}
+      else if(typeof r[key]==='boolean')fila.push(r[key]?'ON':'OFF');
+      else fila.push(r[key]?.toFixed?.(4)??r[key]??'');
+    });
+    filas.push(fila);
+  });
+  const csv=filas.map(f=>f.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='lecturas_sensores_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+// ── Chips de sensores
+document.querySelectorAll('.chip[data-sensor]').forEach(c=>{
+  c.addEventListener('click',()=>c.classList.toggle('activo'));
+});
+
+// ── PANEL FILTROS ─────────────────────────────────────────────
+function abrirFiltros(){
+  document.getElementById('filterPanel').classList.add('open');
+  document.getElementById('filterBackdrop').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function cerrarFiltros(){
+  document.getElementById('filterPanel').classList.remove('open');
+  document.getElementById('filterBackdrop').style.display='none';
+  document.body.style.overflow='';
+}
+document.querySelectorAll('.chip[data-accion]').forEach(c=>{
+  c.addEventListener('click',()=>{c.classList.toggle('activo');actualizarChipTodo();});
+});
+function actualizarChipTodo(){
+  const t=document.querySelectorAll('.chip[data-accion]').length;
+  const a=document.querySelectorAll('.chip[data-accion].activo').length;
+  document.getElementById('chipTodo').classList.toggle('activo',a===t);
+}
+function toggleTodo(){
+  const todos=[...document.querySelectorAll('.chip[data-accion]')];
+  const hayTodo=todos.every(c=>c.classList.contains('activo'));
+  todos.forEach(c=>hayTodo?c.classList.remove('activo'):c.classList.add('activo'));
+  document.getElementById('chipTodo').classList.toggle('activo',!hayTodo);
+}
+function setPeriodo(p,btn){
+  periodoActivo=p;
+  document.querySelectorAll('.periodo-btn').forEach(b=>b.classList.remove('activo'));
+  if(btn)btn.classList.add('activo');
+  document.getElementById('dateRange').style.display=p==='custom'?'grid':'none';
+}
+function limpiarFiltros(){
+  document.querySelectorAll('.chip[data-accion]').forEach(c=>c.classList.add('activo'));
+  document.getElementById('chipTodo').classList.add('activo');
+  periodoActivo='todo';
+  document.querySelectorAll('.periodo-btn').forEach((b,i)=>b.classList.toggle('activo',i===3));
+  document.getElementById('dateRange').style.display='none';
+  document.getElementById('filtroDesde').value='';
+  document.getElementById('filtroHasta').value='';
+  document.getElementById('filtroUsuario').value='';
+  aplicarFiltros();
+}
+
+// ── DESCARGAR ─────────────────────────────────────────────────
+function descargarVista(){
+  if(!registrosFiltrados.length){alert('No hay registros para descargar.');return;}
+  const filas=[['Fecha y hora','Accion','Usuario','Descripcion']];
+  registrosFiltrados.forEach(r=>filas.push([new Date(r.timestamp).toLocaleString(),r.accion,r.usuario||'sistema',r.descripcion]));
+  const csv=filas.map(f=>f.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='actividades_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+async function descargarTodo(){
+  const r=await fetch(URL_B+'/api/export/audit',{headers:{'Authorization':'Bearer '+TK}});
+  if(!r.ok){alert('Se requiere rol Supervisor para exportar.');return;}
+  const blob=await r.blob();const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='historial_completo.csv';a.click();
+}
+
+async function cerrarSesion(){
+  await fetch(URL_B+'/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+TK}}).catch(()=>{});
+  localStorage.clear();location.href='login.html';
+}
+
+cargarTodos();
+
+iniciarReloj();
+</script>
+</body>
+</html>

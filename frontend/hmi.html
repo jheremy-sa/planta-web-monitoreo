@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HMI — Planta de Nivel · UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="assets/js/common.js"></script>
+<style>
+.hmi-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:900px){.hmi-grid{grid-template-columns:1fr}}
+.dot-p1{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 5px var(--cyan-glow);flex-shrink:0}
+.dot-p2{width:9px;height:9px;border-radius:50%;background:#b87333;flex-shrink:0}
+.status-bar{text-align:center;font-size:11px;color:var(--muted);margin:3px 0 14px;display:flex;align-items:center;justify-content:center;gap:6px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="icon-btn hamburger" onclick="toggleNav()"><i class="fa-solid fa-bars"></i></button>
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" class="logo-img" alt="Acuicultura">
+    <div class="logo-text">
+      <div class="nombre">ACUICULTURA DIGITAL</div>
+      <div class="sub" data-i18n="login.subtitle">Transformación Digital, Aplicando IA en Acuicultura</div>
+    </div>
+  </a>
+  <nav id="topNav">
+    <a href="hmi.html" class="activo"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="nav.plant">Planta</span></a>
+    <a href="historial.html"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="nav.history">Historial</span></a>
+    <a href="comentarios.html"><i class="fa-solid fa-comments"></i> <span data-i18n="nav.comments">Comentarios</span></a>
+    <a href="usuarios.html" id="navUsuarios" style="display:none"><i class="fa-solid fa-users"></i> <span data-i18n="nav.users">Usuarios</span></a>
+    <a href="#" id="navConfig" style="display:none" onclick="abrirConfig(event)"><i class="fa-solid fa-pen-to-square"></i> Editar Planta</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="topbar-right">
+    <!-- Idioma -->
+    <!-- Tema -->
+    <!-- Notificaciones -->
+    <div style="position:relative">
+      <button class="icon-btn notif-btn" id="btnNotif" onclick="toggleNotif()">
+        <i class="fa-solid fa-bell"></i>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <div class="notif-panel" id="notifPanel">
+        <div class="notif-panel-header">
+          <h4><i class="fa-solid fa-bell" style="color:var(--accent)"></i> <span data-i18n="notif.title">Notificaciones</span></h4>
+          <button class="btn sm" onclick="marcarTodasLeidas()"><i class="fa-solid fa-check-double"></i> <span data-i18n="notif.read_all">Leer todas</span></button>
+        </div>
+        <div id="notifLista"><div class="notif-empty"><i class="fa-solid fa-bell-slash"></i><span data-i18n="notif.empty">Sin notificaciones</span></div></div>
+      </div>
+    </div>
+    <!-- Usuario -->
+    <div class="user-pill" onclick="mostrarMenuUsuario()">
+      <span class="dot"></span>
+      <span id="userLabel">—</span>
+      <span class="role-badge" id="roleLabel">—</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="section-divider"><span class="dot-p1"></span><i class="fa-solid fa-wifi"></i><span data-i18n="hmi.plant1">Planta 1</span></div>
+  <div id="statusP1" class="status-bar"><i class="fa-solid fa-spinner fa-spin"></i> <span data-i18n="g.connecting">Conectando...</span></div>
+  <div class="hmi-grid">
+    <div class="card">
+      <div class="card-header"><h3><i class="fa-solid fa-chart-line"></i> <span data-i18n="hmi.vars">Variables del Proceso</span></h3></div>
+      <div class="grid-auto" id="sensoresP1"></div>
+    </div>
+    <div class="card" id="seccionCamara">
+      <div class="card-header"><h3><i class="fa-solid fa-video"></i> <span data-i18n="hmi.cam">Cámara en Vivo</span></h3></div>
+      <div class="camara-box">
+        <img id="camaraImg" src="https://planta-backend-ifsy.onrender.com/video-en-vivo" alt="Cam"
+             onerror="this.style.display='none';document.getElementById('camFallback').style.display='block'">
+        <div id="camFallback" class="cam-fallback" style="display:none">
+          <i class="fa-solid fa-video-slash"></i>
+          <span data-i18n="hmi.cam.na">Cámara no disponible</span><br>
+          <button class="btn sm mt-2" onclick="reintentarCamara()"><i class="fa-solid fa-rotate"></i> <span data-i18n="hmi.retry">Reintentar</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="card grid-full">
+      <div class="card-header"><h3><i class="fa-solid fa-chart-area"></i> <span data-i18n="hmi.chart">Nivel del Tanque — Últimos 30 min</span></h3></div>
+      <div class="chart-wrap"><canvas id="graficaP1" height="100"></canvas></div>
+    </div>
+    <div class="card" id="seccionCtrlP1">
+      <div class="card-header"><h3><i class="fa-solid fa-sliders"></i> <span data-i18n="hmi.ctrl1">Control Planta 1</span></h3></div>
+      <div id="ctrlP1"><div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+    </div>
+    <div class="card" id="seccionCtrlP2">
+      <div class="card-header"><h3><i class="fa-solid fa-sliders"></i> <span data-i18n="hmi.ctrl2">Control Planta 2</span></h3></div>
+      <div id="ctrlP2"><div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+    </div>
+  </div>
+
+  <div class="section-divider" style="margin-top:24px"><span class="dot-p2"></span><i class="fa-solid fa-microchip"></i><span data-i18n="hmi.plant2">Planta 2</span></div>
+  <div id="statusP2" class="status-bar"><i class="fa-solid fa-spinner fa-spin"></i> <span data-i18n="g.connecting">Conectando...</span></div>
+  <div class="hmi-grid">
+    <div class="card">
+      <div class="card-header"><h3><i class="fa-solid fa-chart-line"></i> <span data-i18n="hmi.vars">Variables del Proceso</span></h3></div>
+      <div class="grid-auto" id="sensoresP2"></div>
+    </div>
+    <div class="card" id="seccionGraficaP2">
+      <div class="card-header"><h3><i class="fa-solid fa-chart-area"></i> Nivel P2 — 30 min</h3></div>
+      <div class="chart-wrap"><canvas id="graficaP2" height="200"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal usuario -->
+<div class="modal-overlay" id="modalUser" style="display:none" onclick="cerrarModalUser(event)">
+  <div class="modal" style="max-width:300px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-user"></i> <span data-i18n="g.myaccount">Mi cuenta</span></h3>
+      <button class="btn-close" onclick="cerrarModalUser()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p id="userInfo" style="margin:0 0 16px;color:var(--muted);font-size:12px"></p>
+      <div class="gap-6">
+        <button class="btn primary block" onclick="cerrarModalUser();abrirPanelConfig()">
+          <i class="fa-solid fa-gear"></i> Configuración
+        </button>
+        <button class="btn danger block" onclick="cerrarSesion()">
+          <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL DE CONFIGURACIÓN DE WIDGETS ══════════════════════════ -->
+<div class="filter-backdrop" id="configBackdrop" onclick="cerrarConfig()"></div>
+<div class="config-panel" id="configPanel">
+  <div class="config-head">
+    <h3><i class="fa-solid fa-pen-to-square"></i> Editar Planta</h3>
+    <button class="btn-close" onclick="cerrarConfig()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="config-body">
+    <p style="font-size:12px;color:var(--muted);margin:0 0 14px">
+      Activa o desactiva qué variables aparecen en la vista de la planta.
+      Los cambios se aplican inmediatamente y se guardan para todos los usuarios.
+    </p>
+
+    <div class="config-section-title"><i class="fa-solid fa-wifi"></i> Planta 1 — Variables</div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-water"></i><div><div>Nivel</div><div class="sub">cm — sensor ultrasónico</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_nivel" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-gauge"></i><div><div>Caudal</div><div class="sub">L/min — caudalímetro</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_caudal" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-thermometer-half"></i><div><div>Temperatura Ambiente</div><div class="sub">°C — DHT22</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_temp_ambiente" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-droplet"></i><div><div>Humedad</div><div class="sub">% — DHT22</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_humedad" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-temperature-quarter"></i><div><div>Temperatura del Agua</div><div class="sub">°C — DS18B20</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_temp_agua" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-arrows-up-down"></i><div><div>Flotadores</div><div class="sub">Estado alto y bajo</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_flotadores" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-water-ladder"></i><div><div>Estado Bomba</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_bomba" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-faucet"></i><div><div>Estado Electroválvula</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p1_valvula" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+
+    <div class="config-section-title" style="margin-top:20px"><i class="fa-solid fa-microchip"></i> Planta 1 — Secciones</div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-video"></i><div><div>Cámara en vivo</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-camara" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-chart-area"></i><div><div>Gráfica de nivel P1</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-grafica_p1" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-sliders"></i><div><div>Panel de control P1</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-ctrl_p1" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+
+    <div class="config-section-title" style="margin-top:20px"><i class="fa-solid fa-microchip"></i> Planta 2 — Variables</div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-water"></i><div><div>Nivel P2</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p2_nivel" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-gauge"></i><div><div>Caudal P2</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p2_caudal" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-water-ladder"></i><div><div>Estado Bomba P2</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p2_bomba" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-faucet"></i><div><div>Estado Electroválvula P2</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-p2_valvula" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-chart-area"></i><div><div>Gráfica de nivel P2</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-grafica_p2" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+    <div class="toggle-row"><div class="toggle-label"><i class="fa-solid fa-sliders"></i><div><div>Panel de control P2</div></div></div><label class="toggle-switch"><input type="checkbox" id="w-ctrl_p2" onchange="guardarConfig()"><div class="toggle-track"></div></label></div>
+  </div>
+  <div class="config-foot">
+    <button class="btn" onclick="resetConfig()" style="flex:0 0 auto"><i class="fa-solid fa-rotate-left"></i> Mostrar todo</button>
+    <button class="btn primary" onclick="cerrarConfig()" style="flex:1"><i class="fa-solid fa-check"></i> Listo</button>
+  </div>
+</div>
+
+<script>
+let ultimoDatoP1=null, ultimoDatoP2=null;
+const URL='https://planta-backend-ifsy.onrender.com';
+const TK=localStorage.getItem('hmi_token');
+const ROL=localStorage.getItem('hmi_role');
+const USR=localStorage.getItem('hmi_username');
+if(!TK) location.href='login.html';
+
+document.getElementById('userLabel').textContent=USR||'?';
+document.getElementById('roleLabel').textContent=ROL==='admin_pro'?'Supervisor':'Operador';
+if(ROL==='admin_pro'){document.getElementById('roleLabel').classList.add('pro');document.getElementById('navUsuarios').style.display='';document.getElementById('navConfig').style.display='';}
+document.getElementById('userInfo').textContent=USR+' · '+(ROL==='admin_pro'?'Supervisor':'Operador');
+
+function toggleNav(){document.getElementById('topNav').classList.toggle('open');}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#topNav')&&!e.target.closest('.hamburger'))
+    document.getElementById('topNav').classList.remove('open');
+});
+
+async function api(p,o={}){
+  o.headers={...(o.headers||{}),'Authorization':'Bearer '+TK};
+  const r=await fetch(URL+p,o);
+  if(r.status===401){location.href='login.html';return null;}
+  return r.json();
+}
+
+// ── SENSORES P1
+function renderSensoresP1(d){
+  const campos=[
+    {id:'nivel',label:t('s.level'),unit:'cm',icon:'fa-water',wkey:'p1_nivel'},
+    {id:'caudal',label:t('s.flow'),unit:'L/min',icon:'fa-gauge',wkey:'p1_caudal'},
+    {id:'temp_ambiente',label:t('s.temp_a'),unit:'°C',icon:'fa-thermometer-half',wkey:'p1_temp_ambiente'},
+    {id:'humedad',label:t('s.humid'),unit:'%',icon:'fa-droplet',wkey:'p1_humedad'},
+    {id:'temp_agua',label:t('s.temp_w'),unit:'°C',icon:'fa-temperature-quarter',wkey:'p1_temp_agua'},
+  ].filter(f => widgetsConfig[f.wkey] !== false);
+  const campos2=[{id:'nivel',label:t('s.level'),unit:'cm',icon:'fa-water'},
+    {id:'caudal',label:t('s.flow'),unit:'L/min',icon:'fa-gauge'},
+    {id:'temp_ambiente',label:t('s.temp_a'),unit:'°C',icon:'fa-thermometer-half'},
+    {id:'humedad',label:t('s.humid'),unit:'%',icon:'fa-droplet'},
+    {id:'temp_agua',label:t('s.temp_w'),unit:'°C',icon:'fa-temperature-quarter'},
+  ];
+  const estados=[
+    {id:'flotador_bajo',label:t('s.flo_lo'),wkey:'p1_flotadores',on:t('s.active'),off:t('s.normal'),icon:'fa-arrows-down-to-line'},
+    {id:'flotador_alto',label:t('s.flo_hi'),wkey:'p1_flotadores',on:t('s.active'),off:t('s.normal'),icon:'fa-arrows-up-to-line'},
+    {id:'bomba_estado',label:t('ctrl.pump'),wkey:'p1_bomba',on:t('ctrl.on_s'),off:t('ctrl.off_s'),icon:'fa-water-ladder'},
+    {id:'valvula_estado',label:t('ctrl.valve'),wkey:'p1_valvula',on:t('ctrl.open_s'),off:t('ctrl.close_s'),icon:'fa-faucet'},
+  ];
+  document.getElementById('sensoresP1').innerHTML=
+    campos.map(f=>`<div class="metric-card"><i class="fa-solid ${f.icon} metric-ico"></i>
+      <div class="metric-label"><i class="fa-solid ${f.icon}"></i>${f.label}</div>
+      <div class="metric-value">${d[f.id]?.toFixed(2)??'--'}</div>
+      <div class="metric-unit">${f.unit}</div></div>`).join('')+
+    estados.map(f=>{const on=d[f.id];return`<div class="metric-card ${on?'ok':''}">
+      <i class="fa-solid ${f.icon} metric-ico"></i>
+      <div class="metric-label"><i class="fa-solid ${f.icon}"></i>${f.label}</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-top:7px">
+        <span class="led-indicator ${on?'led-green':'led-gray'}"></span>
+        <span style="font-weight:700;font-size:13px">${on?f.on:f.off}</span>
+      </div></div>`}).join('');
+}
+
+async function actualizarP1(){
+  try{const d=await api('/api/lecturas/ultima');if(!d)return;
+    ultimoDatoP1=d;
+renderSensoresP1(d);
+    document.getElementById('statusP1').innerHTML=
+      `<i class="fa-solid fa-circle-check" style="color:var(--green)"></i> ${new Date(d.timestamp).toLocaleTimeString()}`;
+  }catch(e){document.getElementById('statusP1').innerHTML=
+    `<i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i> Sin conexión P1`;}
+}
+
+const grafP1=new Chart(document.getElementById('graficaP1').getContext('2d'),{
+  type:'line',data:{labels:[],datasets:[{label:'Nivel',data:[],borderColor:'#14b8a6',
+    backgroundColor:'rgba(20,184,166,.07)',tension:.3,pointRadius:0,fill:true,borderWidth:2}]},
+  options:{responsive:true,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#7d8590',maxTicksLimit:8},grid:{color:'rgba(0,0,0,.1)'}},
+            y:{ticks:{color:'#7d8590'},grid:{color:'rgba(0,0,0,.1)'}}}}});
+
+async function actualizarGraficaP1(){
+  const d=await api('/api/lecturas/historial?minutos=30');if(!d)return;
+  grafP1.data.labels=d.map(r=>new Date(r.timestamp).toLocaleTimeString().slice(0,5));
+  grafP1.data.datasets[0].data=d.map(r=>r.nivel);grafP1.update();}
+
+let cmdP1={bomba_deseada:true,valvula_deseada:false};
+function renderCtrlP1(){
+  const b=cmdP1.bomba_deseada,v=cmdP1.valvula_deseada;
+  document.getElementById('ctrlP1').innerHTML=`
+    <div class="ctrl-row">
+      <div><div class="ctrl-label"><i class="fa-solid fa-water-ladder"></i> ${t('ctrl.pump')}</div>
+           <div class="ctrl-sub">${b?t('ctrl.on_s'):t('ctrl.off_s')}</div></div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn ${b?'on-active':''}" onclick="cambiarP1('bomba',true)"><i class="fa-solid fa-play"></i>${t('ctrl.on')}</button>
+        <button class="ctrl-btn ${!b?'off-active':''}" onclick="cambiarP1('bomba',false)"><i class="fa-solid fa-stop"></i>${t('ctrl.off')}</button>
+      </div></div>
+    <div class="ctrl-row">
+      <div><div class="ctrl-label"><i class="fa-solid fa-faucet"></i> ${t('ctrl.valve')}</div>
+           <div class="ctrl-sub">${v?t('ctrl.open_s'):t('ctrl.close_s')}</div></div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn ${v?'on-active':''}" onclick="cambiarP1('valvula',true)"><i class="fa-solid fa-lock-open"></i>${t('ctrl.open')}</button>
+        <button class="ctrl-btn ${!v?'off-active':''}" onclick="cambiarP1('valvula',false)"><i class="fa-solid fa-lock"></i>${t('ctrl.close')}</button>
+      </div></div>`;
+}
+async function cambiarP1(d,v){
+  const b={bomba_deseada:cmdP1.bomba_deseada,valvula_deseada:cmdP1.valvula_deseada};
+  if(d==='bomba')b.bomba_deseada=v;else b.valvula_deseada=v;
+  const r=await api('/api/admin/comando',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  if(r){cmdP1=r;renderCtrlP1();}}
+async function cargarCtrlP1(){const d=await api('/api/comando');if(d){cmdP1=d;renderCtrlP1();}}
+
+// ── SENSORES P2
+function renderSensoresP2(d){
+  document.getElementById('sensoresP2').innerHTML=`
+    <div class="metric-card p2"><i class="fa-solid fa-water metric-ico"></i>
+      <div class="metric-label"><i class="fa-solid fa-water"></i>${t('s.level')}</div>
+      <div class="metric-value">${d.nivel?.toFixed(2)??'--'}</div><div class="metric-unit">cm</div></div>
+    <div class="metric-card p2"><i class="fa-solid fa-gauge metric-ico"></i>
+      <div class="metric-label"><i class="fa-solid fa-gauge"></i>${t('s.flow')}</div>
+      <div class="metric-value">${d.caudal?.toFixed(3)??'--'}</div><div class="metric-unit">L/min</div></div>
+    <div class="metric-card ${d.bomba_estado?'ok':''}">
+      <div class="metric-label"><i class="fa-solid fa-water-ladder"></i>${t('ctrl.pump')}</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-top:7px">
+        <span class="led-indicator ${d.bomba_estado?'led-green':'led-gray'}"></span>
+        <span style="font-weight:700">${d.bomba_estado?t('ctrl.on_s'):t('ctrl.off_s')}</span></div></div>
+    <div class="metric-card ${d.valvula_estado?'ok':''}">
+      <div class="metric-label"><i class="fa-solid fa-faucet"></i>${t('ctrl.valve')}</div>
+      <div style="display:flex;align-items:center;gap:7px;margin-top:7px">
+        <span class="led-indicator ${d.valvula_estado?'led-green':'led-gray'}"></span>
+        <span style="font-weight:700">${d.valvula_estado?t('ctrl.open_s'):t('ctrl.close_s')}</span></div></div>`;}
+
+async function actualizarP2(){
+  try{const d=await api('/api/lecturas/planta2/ultima');if(!d)return;
+    ultimoDatoP2=d;
+renderSensoresP2(d);
+    document.getElementById('statusP2').innerHTML=
+      `<i class="fa-solid fa-circle-check" style="color:var(--green)"></i> ${new Date(d.timestamp).toLocaleTimeString()}`;
+  }catch(e){document.getElementById('statusP2').innerHTML=
+    `<i class="fa-solid fa-triangle-exclamation" style="color:var(--yellow)"></i> Sin datos P2`;}
+}
+
+const grafP2=new Chart(document.getElementById('graficaP2').getContext('2d'),{
+  type:'line',data:{labels:[],datasets:[{label:'Nivel P2',data:[],borderColor:'#b87333',
+    backgroundColor:'rgba(184,115,51,.07)',tension:.3,pointRadius:0,fill:true,borderWidth:2}]},
+  options:{responsive:true,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#7d8590',maxTicksLimit:8},grid:{color:'rgba(0,0,0,.1)'}},
+            y:{ticks:{color:'#7d8590'},grid:{color:'rgba(0,0,0,.1)'}}}}});
+
+async function actualizarGraficaP2(){
+  const d=await api('/api/lecturas/planta2/historial?minutos=30');if(!d)return;
+  grafP2.data.labels=d.map(r=>new Date(r.timestamp).toLocaleTimeString().slice(0,5));
+  grafP2.data.datasets[0].data=d.map(r=>r.nivel);grafP2.update();}
+
+let cmdP2={valvula_deseada:false,pwm_deseado:0};
+function renderCtrlP2(){
+  const v=cmdP2.valvula_deseada,p=cmdP2.pwm_deseado,pct=Math.round((p/255)*100);
+  document.getElementById('ctrlP2').innerHTML=`
+    <div class="ctrl-row">
+      <div><div class="ctrl-label"><i class="fa-solid fa-faucet"></i>${t('ctrl.valve')}</div>
+           <div class="ctrl-sub">${v?t('ctrl.open_s'):t('ctrl.close_s')}</div></div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn ${v?'on-active':''}" onclick="cambiarP2('v',true)"><i class="fa-solid fa-lock-open"></i>${t('ctrl.open')}</button>
+        <button class="ctrl-btn ${!v?'off-active':''}" onclick="cambiarP2('v',false)"><i class="fa-solid fa-lock"></i>${t('ctrl.close')}</button>
+      </div></div>
+    <div class="ctrl-row">
+      <div><div class="ctrl-label"><i class="fa-solid fa-water-ladder"></i>${t('ctrl.pump')} PWM</div>
+           <div class="ctrl-sub">PWM: ${p} — ${pct}%</div></div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn ${p===0?'off-active':''}" onclick="setPwmP2(0)"><i class="fa-solid fa-stop"></i>${t('ctrl.off')}</button>
+        <button class="ctrl-btn ${p===85?'on-active':''}" onclick="setPwmP2(85)">33%</button>
+        <button class="ctrl-btn ${p===170?'on-active':''}" onclick="setPwmP2(170)">67%</button>
+        <button class="ctrl-btn ${p===255?'on-active':''}" onclick="setPwmP2(255)">100%</button>
+      </div></div>`;}
+async function cambiarP2(d,v){
+  const b={valvula_deseada:cmdP2.valvula_deseada,pwm_deseado:cmdP2.pwm_deseado};
+  if(d==='v')b.valvula_deseada=v;
+  const r=await api('/api/admin/comando/planta2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  if(r){cmdP2=r;renderCtrlP2();}}
+async function setPwmP2(v){
+  const r=await api('/api/admin/comando/planta2',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({valvula_deseada:cmdP2.valvula_deseada,pwm_deseado:v})});
+  if(r){cmdP2=r;renderCtrlP2();}}
+async function cargarCtrlP2(){const d=await api('/api/comando/planta2');if(d){cmdP2=d;renderCtrlP2();}}
+
+// ── NOTIFICACIONES
+let notifVisible=false,ultimoCount=0,primeraPoll=true;
+function toggleNotif(){
+  notifVisible=!notifVisible;
+  document.getElementById('notifPanel').classList.toggle('open',notifVisible);
+  if(notifVisible)cargarNotificaciones();
+}
+async function cargarNotificaciones(){
+  const[lista,conteo]=await Promise.all([api('/api/notificaciones'),api('/api/notificaciones/no-leidas')]);
+  if(!lista)return;
+  actualizarBadgeConConteo(conteo?.count||0);
+  document.getElementById('notifLista').innerHTML=lista.length===0
+    ?`<div class="notif-empty"><i class="fa-solid fa-bell-slash"></i><br>${t('notif.empty')}</div>`
+    :lista.map(n=>`
+      <div class="notif-item ${n.leida?'read-item':'unread'}" onclick="leerNotif(${n.id})">
+        <div class="notif-ico"><i class="fa-solid ${n.leida?'fa-check':'fa-bell'}"></i></div>
+        <div>
+          <div class="notif-title">${n.titulo}</div>
+          <div class="notif-msg">${n.mensaje.slice(0,100)}</div>
+          <div class="notif-time"><i class="fa-regular fa-clock"></i> ${new Date(n.created_at).toLocaleString()}</div>
+        </div>
+      </div>`).join('');
+}
+function actualizarBadgeConConteo(count){
+  const badge=document.getElementById('notifBadge');
+  if(!primeraPoll&&count>ultimoCount)
+    mostrarToast('🔔 '+t('notif.title'),count+' '+t('notif.title').toLowerCase());
+  primeraPoll=false;ultimoCount=count;
+  badge.textContent=count;badge.style.display=count>0?'':'none';
+}
+function mostrarToast(titulo,msg){
+  const t2=document.createElement('div');t2.className='toast-notif';
+  t2.innerHTML=`<i class="fa-solid fa-bell"></i><div><div class="toast-title">${titulo}</div><div class="toast-msg">${msg}</div></div>`;
+  document.body.appendChild(t2);
+  setTimeout(()=>t2.classList.add('show'),50);
+  setTimeout(()=>{t2.classList.remove('show');setTimeout(()=>t2.remove(),350);},4500);
+}
+async function actualizarBadge(){const d=await api('/api/notificaciones/no-leidas');if(d)actualizarBadgeConConteo(d.count);}
+async function leerNotif(id){await api(`/api/notificaciones/${id}/leer`,{method:'POST'});cargarNotificaciones();}
+async function marcarTodasLeidas(){await api('/api/notificaciones/leer-todas',{method:'POST'});cargarNotificaciones();}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#btnNotif')&&!e.target.closest('#notifPanel'))
+    document.getElementById('notifPanel').classList.remove('open');
+});
+
+function reintentarCamara(){
+  const img=document.getElementById('camaraImg');
+  document.getElementById('camFallback').style.display='none';
+  img.style.display='block';img.src=URL+'/video-en-vivo?_='+Date.now();}
+function mostrarMenuUsuario(){document.getElementById('modalUser').style.display='flex';}
+function cerrarModalUser(e){if(!e||e.target.id==='modalUser')document.getElementById('modalUser').style.display='none';}
+async function cerrarSesion(){await api('/api/auth/logout',{method:'POST'}).catch(()=>{});localStorage.clear();location.href='login.html';}
+
+
+// ── CONFIGURACIÓN DE WIDGETS (Supervisor) ─────────────────────
+const WIDGETS_DEFAULT = {
+  p1_nivel:true, p1_caudal:true, p1_temp_ambiente:true, p1_humedad:true,
+  p1_temp_agua:true, p1_flotadores:true, p1_bomba:true, p1_valvula:true,
+  camara:true, grafica_p1:true, ctrl_p1:true,
+  p2_nivel:true, p2_caudal:true, p2_bomba:true, p2_valvula:true,
+  grafica_p2:true, ctrl_p2:true,
+};
+let widgetsConfig = {...WIDGETS_DEFAULT};
+
+async function cargarConfig() {
+  try {
+    // Intentar cargar config del servidor (para que Operadores vean lo que el Supervisor configuró)
+    const serverData = await api('/api/hmi/layout');
+    if (serverData && serverData.layout_json && serverData.layout_json !== '{}') {
+      const parsed = JSON.parse(serverData.layout_json);
+      if (parsed.widgets) {
+        widgetsConfig = {...WIDGETS_DEFAULT, ...parsed.widgets};
+        localStorage.setItem('hmi_widgets', JSON.stringify(widgetsConfig));
+        aplicarConfig();
+        return;
+      }
+    }
+  } catch(e) {}
+  // Fallback: localStorage
+  try {
+    const guardado = JSON.parse(localStorage.getItem('hmi_widgets') || '{}');
+    widgetsConfig = {...WIDGETS_DEFAULT, ...guardado};
+  } catch(e) {
+    widgetsConfig = {...WIDGETS_DEFAULT};
+  }
+  aplicarConfig();
+}
+
+function aplicarConfig() {
+  // Actualizar toggles del panel
+  Object.keys(widgetsConfig).forEach(k => {
+    const el = document.getElementById('w-' + k);
+    if (el) el.checked = widgetsConfig[k];
+  });
+  // Mostrar/ocultar secciones completas
+  const show = (id, vis) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = vis ? '' : 'none';
+  };
+  // Las tarjetas de sensores se reconstruyen al actualizar datos
+  // Ocultar/mostrar secciones de la grilla
+  show('seccionCamara',   widgetsConfig.camara);
+  show('seccionGraficaP1', widgetsConfig.grafica_p1);
+  show('seccionCtrlP1',   widgetsConfig.ctrl_p1);
+  show('seccionGraficaP2', widgetsConfig.grafica_p2);
+  show('seccionCtrlP2',   widgetsConfig.ctrl_p2);
+}
+
+function guardarConfig() {
+  Object.keys(widgetsConfig).forEach(k => {
+    const el = document.getElementById('w-' + k);
+    if (el) widgetsConfig[k] = el.checked;
+  });
+  localStorage.setItem('hmi_widgets', JSON.stringify(widgetsConfig));
+  // Guardar también al backend (para que todos los usuarios vean los mismos widgets)
+  api('/api/hmi/layout', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({layout_json: JSON.stringify({widgets: widgetsConfig})})
+  }).catch(() => {});
+  aplicarConfig();
+  // Re-renderizar sensores con los widgets activos
+  if (typeof ultimoDatoP1 !== 'undefined' && ultimoDatoP1) renderSensoresP1(ultimoDatoP1);
+  if (typeof ultimoDatoP2 !== 'undefined' && ultimoDatoP2) renderSensoresP2(ultimoDatoP2);
+}
+
+function resetConfig() {
+  widgetsConfig = {...WIDGETS_DEFAULT};
+  localStorage.setItem('hmi_widgets', JSON.stringify(widgetsConfig));
+  aplicarConfig();
+}
+
+function abrirConfig(e) {
+  if(e) e.preventDefault();
+  document.getElementById('configPanel').classList.add('open');
+  document.getElementById('configBackdrop').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarConfig() {
+  document.getElementById('configPanel').classList.remove('open');
+  document.getElementById('configBackdrop').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Init
+cargarConfig();
+actualizarP1();actualizarGraficaP1();actualizarP2();actualizarGraficaP2();
+cargarCtrlP1();cargarCtrlP2();actualizarBadge();
+setInterval(actualizarP1,1200);setInterval(actualizarP2,1200);
+setInterval(actualizarGraficaP1,8000);setInterval(actualizarGraficaP2,8000);
+setInterval(actualizarBadge,4000);
+
+iniciarReloj();
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comentarios — HMI Acuicultura UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="assets/js/common.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <button class="icon-btn hamburger" onclick="toggleNav()"><i class="fa-solid fa-bars"></i></button>
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" class="logo-img" alt="Acuicultura">
+    <div class="logo-text"><div class="nombre">ACUICULTURA DIGITAL</div>
+    <div class="sub">Transformación Digital · Acuicultura UPSE</div></div>
+  </a>
+  <nav>
+    <a href="hmi.html"><i class="fa-solid fa-gauge-high"></i> Planta</a>
+    <a href="historial.html"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
+    <a href="comentarios.html" class="activo"><i class="fa-solid fa-comments"></i> Comentarios</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <span class="dot"></span>
+      <span id="userLabel">—</span>
+      <span class="role-badge" id="roleLabel">—</span>
+    </div>
+    <button class="icon-btn" onclick="abrirPanelConfig()" title="Configuración" style="color:#c5d0da">
+      <i class="fa-solid fa-gear"></i>
+    </button>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span class="logout-text">Cerrar sesión</span>
+    </button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="flex between mb-2" style="flex-wrap:wrap;gap:10px">
+    <h2 style="margin:0;display:flex;align-items:center;gap:10px">
+      <i class="fa-solid fa-comments" style="color:var(--accent)"></i> Comentarios y Solicitudes
+    </h2>
+    <button class="btn primary" onclick="abrirModal()">
+      <i class="fa-solid fa-plus"></i> Nueva solicitud
+    </button>
+  </div>
+  <div id="alertTop"></div>
+
+  <div class="card">
+    <div id="listaCom"><div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+  </div>
+
+  <!-- Panel respuesta (Supervisor) -->
+  <div id="panelRespuesta" class="card" style="display:none">
+    <div class="card-header">
+      <h3><i class="fa-solid fa-reply"></i> Responder solicitud #<span id="respId"></span></h3>
+    </div>
+    <div class="gap-6">
+      <p id="respAsunto" style="font-weight:700;margin:0;color:var(--text)"></p>
+      <p id="respJustif" style="margin:0;color:var(--muted);font-size:12px"></p>
+      <div class="field">
+        <label><i class="fa-solid fa-comment-dots"></i> Respuesta</label>
+        <textarea id="respTxt" rows="3" placeholder="Escribe tu respuesta..."></textarea>
+      </div>
+      <div class="flex wrap" style="gap:8px">
+        <button class="btn success" onclick="responder(true)">
+          <i class="fa-solid fa-circle-check"></i> Aprobar
+        </button>
+        <button class="btn danger" onclick="responder(false)">
+          <i class="fa-solid fa-circle-xmark"></i> Rechazar
+        </button>
+        <button class="btn" onclick="cerrarRespuesta()">
+          <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+      </div>
+      <div id="panelToken" style="display:none">
+        <div class="divider"></div>
+        <p style="font-weight:700;margin:0 0 10px;color:var(--text)">
+          <i class="fa-solid fa-ticket" style="color:var(--accent)"></i>
+          Generar token de acceso temporal al editor
+        </p>
+        <div class="flex wrap" style="gap:8px">
+          <span style="font-size:12px;color:var(--muted);align-self:center">Duración:</span>
+          <button class="btn sm" onclick="generarToken(30)">30 min</button>
+          <button class="btn sm" onclick="generarToken(60)">1 hora</button>
+          <button class="btn sm" onclick="generarToken(120)">2 horas</button>
+          <button class="btn sm" onclick="generarToken(240)">4 horas</button>
+        </div>
+        <div id="tokenGenerado" class="mt-2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nueva solicitud -->
+<div class="modal-overlay" id="modalCom" style="display:none" onclick="cerrarModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-paper-plane"></i> Nueva Solicitud</h3>
+      <button class="btn-close" onclick="cerrarModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="modalAlert"></div>
+      <div class="gap-6">
+        <div class="field">
+          <label><i class="fa-solid fa-tag"></i> Tipo de solicitud</label>
+          <select id="comTipo">
+            <option value="general">Comentario general</option>
+            <option value="solicitud_accion">Solicitar acción (ej. apagar bomba)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-heading"></i> Asunto</label>
+          <input type="text" id="comAsunto" placeholder="Breve descripción">
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-align-left"></i> Justificación <span style="color:var(--red)">*</span></label>
+          <textarea id="comJustif" rows="4" placeholder="Explica detalladamente el motivo de tu solicitud..."></textarea>
+          <span id="justifError" style="display:none;color:var(--red);font-size:11px">
+            <i class="fa-solid fa-triangle-exclamation"></i> La justificación es obligatoria
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      <button class="btn primary" onclick="enviarSolicitud()">
+        <i class="fa-solid fa-paper-plane"></i> Enviar solicitud
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL='https://planta-backend-ifsy.onrender.com';
+const TK=localStorage.getItem('hmi_token');
+const ROL=localStorage.getItem('hmi_role');
+const USR=localStorage.getItem('hmi_username');
+if(!TK) location.href='login.html';
+document.getElementById('userLabel').textContent=USR||'?';
+document.getElementById('roleLabel').textContent=ROL==='admin_pro'?'Supervisor':'Operador';
+if(ROL==='admin_pro') document.getElementById('roleLabel').classList.add('pro');
+
+async function api(path,opts={}) {
+  opts.headers={...(opts.headers||{}),'Authorization':'Bearer '+TK};
+  const r=await fetch(URL+path,opts);
+  if(r.status===401){location.href='login.html';return null;}
+  return r.json();
+}
+function alerta(id,msg,tipo='danger') {
+  document.getElementById(id).innerHTML=msg
+    ?`<div class="alert ${tipo}"><i class="fa-solid ${tipo==='success'?'fa-circle-check':'fa-triangle-exclamation'}"></i><span>${msg}</span></div>`
+    :'';
+}
+
+const estadoBadge={
+  pendiente: '<span class="badge yellow"><i class="fa-solid fa-clock"></i> Pendiente</span>',
+  respondido:'<span class="badge green"><i class="fa-solid fa-circle-check"></i> Respondido</span>',
+  rechazado: '<span class="badge red"><i class="fa-solid fa-circle-xmark"></i> Rechazado</span>',
+};
+
+async function cargarComentarios() {
+  const lista=await api('/api/comentarios'); if(!lista) return;
+  if(!lista.length){
+    document.getElementById('listaCom').innerHTML='<div class="no-data"><i class="fa-solid fa-inbox"></i>No hay solicitudes aún</div>';
+    return;
+  }
+  document.getElementById('listaCom').innerHTML=`
+    <table class="tabla tabla-cards">
+      <thead><tr><th>Fecha</th><th>De</th><th>Asunto</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${lista.map(c=>`
+        <tr>
+          <td data-label="Fecha" class="font-mono" style="font-size:11px">${new Date(c.created_at).toLocaleString()}</td>
+          <td data-label="De" style="font-size:12px">${c.de_usuario}</td>
+          <td data-label="Asunto">
+            <div style="font-weight:600">${c.asunto}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.justificacion.slice(0,80)}...</div>
+            ${c.respuesta?`<div style="font-size:11px;margin-top:4px;color:var(--green)"><i class="fa-solid fa-reply"></i> ${c.respuesta.slice(0,80)}</div>`:''}
+          </td>
+          <td data-label="Estado">${estadoBadge[c.estado]||c.estado}</td>
+          <td data-label="Acción">${ROL==='admin_pro'&&c.estado==='pendiente'
+            ?`<button class="btn sm primary" onclick="abrirRespuesta(${c.id},'${c.de_usuario}','${c.asunto.replace(/'/g,"\\'")}','${c.tipo}','${c.justificacion.slice(0,200).replace(/'/g,"\\'")}')">
+                <i class="fa-solid fa-reply"></i> Responder
+              </button>`
+            :''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+let comActual=null;
+function abrirRespuesta(id,usuario,asunto,tipo,justif) {
+  comActual={id,usuario,tipo};
+  document.getElementById('respId').textContent=id;
+  document.getElementById('respAsunto').textContent=asunto;
+  document.getElementById('respJustif').textContent=justif;
+  document.getElementById('respTxt').value='';
+  document.getElementById('tokenGenerado').innerHTML='';
+  document.getElementById('panelToken').style.display=tipo==='solicitud_editor'?'':'none';
+  document.getElementById('panelRespuesta').style.display='';
+  document.getElementById('panelRespuesta').scrollIntoView({behavior:'smooth'});
+}
+function cerrarRespuesta(){document.getElementById('panelRespuesta').style.display='none';comActual=null;}
+
+async function responder(aprobar) {
+  const txt=document.getElementById('respTxt').value.trim();
+  if(!txt){alert('Escribe una respuesta antes de enviar.');return;}
+  await api(`/api/comentarios/${comActual.id}/responder`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({respuesta:txt,aprobar})
+  });
+  alerta('alertTop',aprobar?'Solicitud aprobada correctamente.':'Solicitud rechazada.',aprobar?'success':'warning');
+  cerrarRespuesta(); function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarComentarios();
+}
+
+async function generarToken(min) {
+  const d=await api('/api/permisos-temp',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({para_usuario:comActual.usuario,duracion_min:min,comentario_id:comActual.id})
+  });
+  if(!d) return;
+  document.getElementById('tokenGenerado').innerHTML=`
+    <div class="alert success" style="font-family:monospace;word-break:break-all">
+      <i class="fa-solid fa-ticket"></i>
+      <div><strong>Token generado (${min} min):</strong><br>
+      <code style="font-size:14px;letter-spacing:2px">${d.token}</code><br>
+      <small style="color:var(--muted)">El usuario lo recibirá en sus notificaciones</small></div>
+    </div>`;
+  function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarComentarios();
+}
+
+function abrirModal(){document.getElementById('modalCom').style.display='flex';}
+function cerrarModal(e){if(!e||e.target.id==='modalCom')document.getElementById('modalCom').style.display='none';}
+
+async function enviarSolicitud() {
+  const asunto=document.getElementById('comAsunto').value.trim();
+  const justif=document.getElementById('comJustif').value.trim();
+  const tipo=document.getElementById('comTipo').value;
+  if(!justif){document.getElementById('justifError').style.display='';return;}
+  document.getElementById('justifError').style.display='none';
+  const d=await api('/api/comentarios',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({tipo,asunto:asunto||tipo,justificacion:justif})});
+  if(d&&d.id){
+    alerta('modalAlert','Solicitud enviada correctamente.','success');
+    setTimeout(()=>{cerrarModal();function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarComentarios();},1200);
+  }
+}
+
+async function cerrarSesion() {
+  await api('/api/auth/logout',{method:'POST'}).catch(()=>{});
+  localStorage.clear();location.href='login.html';
+}
+function toggleNav(){document.getElementById("topNav").classList.toggle("open");}
+cargarComentarios();
+
+iniciarReloj();
+</script>
+</body>
+</html>

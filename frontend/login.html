@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HMI Industrial — UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="assets/js/common.js"></script>
+<style>
+</style>
+</head>
+<body class="auth">
+
+  <button class="icon-btn" id="btnTema" onclick="toggleTema()"
+          style="background:rgba(255,255,255,.1);border-radius:8px;color:#c5d0da">
+    <i class="fa-solid fa-moon"></i>
+  </button>
+</div>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div class="auth-logo"><i class="fa-solid fa-industry"></i></div>
+      <h1>HMI INDUSTRIAL</h1>
+      <div class="proyecto" data-i18n="login.subtitle">Transformación Digital, Aplicando IA en Acuicultura</div>
+      <p>Universidad Estatal Península de Santa Elena · UPSE 2026</p>
+    </div>
+    <div class="auth-body">
+
+      <div class="screen active" id="scrLogin">
+        <div id="alertLogin" style="display:none" class="alert danger">
+          <i class="fa-solid fa-triangle-exclamation"></i><span></span>
+        </div>
+        <div class="gap-6">
+          <div class="field">
+            <label><i class="fa-solid fa-envelope"></i> <span data-i18n="login.email">Correo</span></label>
+            <input type="text" id="email" placeholder="admin@planta.local" autocomplete="username">
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-lock"></i> <span data-i18n="login.pass">Contraseña</span></label>
+            <input type="password" id="pwd" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button class="btn primary lg block" id="btnLogin" onclick="login()">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span data-i18n="login.btn">Ingresar al sistema</span>
+          </button>
+        </div>
+        <div style="text-align:center;margin-top:14px">
+          <a onclick="mostrar('scrReset')" style="font-size:12px;color:var(--muted);cursor:pointer">
+            <i class="fa-solid fa-key"></i>
+            <span data-i18n="login.forgot">¿Olvidaste tu contraseña?</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="screen" id="scrCambiar">
+        <div class="alert info" style="display:flex;margin-bottom:14px">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Tu contraseña temporal requiere ser cambiada antes de continuar.</span>
+        </div>
+        <div id="alertCambiar" style="display:none" class="alert danger">
+          <i class="fa-solid fa-triangle-exclamation"></i><span></span>
+        </div>
+        <div class="gap-6">
+          <div class="field"><label>Contraseña actual</label>
+            <input type="password" id="pwdActual" placeholder="Tu contraseña temporal"></div>
+          <div class="field"><label>Nueva contraseña</label>
+            <input type="password" id="pwdNueva" placeholder="Mínimo 8 caracteres"></div>
+          <div class="field"><label>Confirmar nueva contraseña</label>
+            <input type="password" id="pwdConfirm" placeholder="Repite la nueva contraseña"></div>
+          <button class="btn primary lg block" onclick="cambiarPwd()">
+            <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="g.save">Guardar</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="screen" id="scrReset">
+        <div class="alert info" style="display:flex;margin-bottom:14px">
+          <i class="fa-solid fa-circle-info"></i>
+          <span data-i18n="login.reset.desc">El Admin Pro recibirá tu solicitud y generará una contraseña temporal.</span>
+        </div>
+        <div id="alertReset" style="display:none" class="alert success">
+          <i class="fa-solid fa-circle-check"></i><span></span>
+        </div>
+        <div class="gap-6">
+          <div class="field">
+            <label><i class="fa-solid fa-envelope"></i> <span data-i18n="login.email">Correo</span></label>
+            <input type="email" id="resetEmail" placeholder="tu@correo.com">
+          </div>
+          <button class="btn primary lg block" onclick="solicitarReset()">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span data-i18n="login.reset.send">Enviar solicitud</span>
+          </button>
+          <button class="btn block" onclick="mostrar('scrLogin')">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span data-i18n="login.back">← Volver al login</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+    <div class="auth-foot">
+      <i class="fa-solid fa-shield-halved" style="color:var(--accent)"></i>
+      Sistema de Monitoreo y Control Industrial · Acceso restringido
+    </div>
+  </div>
+</div>
+
+<script>
+const URL='https://planta-backend-ifsy.onrender.com';
+let tokenTmp='';
+if(localStorage.getItem('hmi_token')) location.href='hmi.html';
+
+function mostrar(id){
+  ['scrLogin','scrCambiar','scrReset'].forEach(s=>{
+    document.getElementById(s).className='screen'+(s===id?' active':'');
+  });
+}
+function alerta(id,msg,tipo='danger'){
+  const el=document.getElementById(id);
+  el.querySelector('span').textContent=msg;
+  el.className='alert '+tipo;el.style.display=msg?'flex':'none';
+  el.querySelector('i').className='fa-solid '+(tipo==='success'?'fa-circle-check':tipo==='warning'?'fa-triangle-exclamation':'fa-triangle-exclamation');
+}
+async function login(){
+  const email=document.getElementById('email').value.trim();
+  const pwd=document.getElementById('pwd').value;
+  if(!email||!pwd){alerta('alertLogin','Completa todos los campos.');return;}
+  const btn=document.getElementById('btnLogin');
+  btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+  try{
+    const r=await fetch(URL+'/api/auth/login',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pwd})});
+    const d=await r.json();
+    if(!r.ok){alerta('alertLogin',r.status===429?'Demasiados intentos. Espera 5 minutos.':(d.detail||'Credenciales incorrectas.'),r.status===429?'warning':'danger');return;}
+    localStorage.setItem('hmi_token',d.access_token);
+    localStorage.setItem('hmi_role',d.role);
+    localStorage.setItem('hmi_username',d.username);
+    tokenTmp=d.access_token;
+    if(d.must_change_password)mostrar('scrCambiar');
+    else location.href='hmi.html';
+  }catch(e){alerta('alertLogin','Sin conexión con el servidor.');}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="login.btn">'+t('login.btn')+'</span>';}
+}
+async function cambiarPwd(){
+  const a=document.getElementById('pwdActual').value,n=document.getElementById('pwdNueva').value,c=document.getElementById('pwdConfirm').value;
+  if(!a||!n||!c){alerta('alertCambiar','Completa todos los campos.');return;}
+  if(n!==c){alerta('alertCambiar','Las contraseñas no coinciden.');return;}
+  if(n.length<8){alerta('alertCambiar','Mínimo 8 caracteres.');return;}
+  const r=await fetch(URL+'/api/auth/cambiar-password',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+tokenTmp},
+    body:JSON.stringify({password_actual:a,password_nueva:n})});
+  if(!r.ok){const d=await r.json();alerta('alertCambiar',d.detail);return;}
+  alerta('alertCambiar','¡Contraseña cambiada! Redirigiendo...','success');
+  setTimeout(()=>location.href='hmi.html',1200);
+}
+async function solicitarReset(){
+  const email=document.getElementById('resetEmail').value.trim();
+  if(!email){alerta('alertReset','Escribe tu correo.');return;}
+  await fetch(URL+'/api/auth/solicitar-reset',{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  alerta('alertReset','Solicitud enviada. El Admin Pro generará tu contraseña temporal.','success');
+}
+['email','pwd'].forEach(id=>document.getElementById(id).addEventListener('keyup',e=>{if(e.key==='Enter')login();}));
+</script>
+</body>
+</html>

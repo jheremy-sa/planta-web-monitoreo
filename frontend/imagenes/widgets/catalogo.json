@@ -1,0 +1,1231 @@
+{
+  "bombas": [
+    {
+      "nombre": "Cavity Pump",
+      "archivo": "01_Cavity Pump.svg",
+      "ruta": "imagenes/widgets/bombas/01_Cavity Pump.svg"
+    },
+    {
+      "nombre": "Centrifugal",
+      "archivo": "01_Centrifugal.svg",
+      "ruta": "imagenes/widgets/bombas/01_Centrifugal.svg"
+    },
+    {
+      "nombre": "Centrifugal Pump 1",
+      "archivo": "02_Centrifugal Pump 1.svg",
+      "ruta": "imagenes/widgets/bombas/02_Centrifugal Pump 1.svg"
+    },
+    {
+      "nombre": "Diaphragm",
+      "archivo": "02_Diaphragm.svg",
+      "ruta": "imagenes/widgets/bombas/02_Diaphragm.svg"
+    },
+    {
+      "nombre": "Centrifugal Pump 2",
+      "archivo": "03_Centrifugal Pump 2.svg",
+      "ruta": "imagenes/widgets/bombas/03_Centrifugal Pump 2.svg"
+    },
+    {
+      "nombre": "Eccentric Worm",
+      "archivo": "03_Eccentric Worm.svg",
+      "ruta": "imagenes/widgets/bombas/03_Eccentric Worm.svg"
+    },
+    {
+      "nombre": "Centrifugal Pump 3",
+      "archivo": "04_Centrifugal Pump 3.svg",
+      "ruta": "imagenes/widgets/bombas/04_Centrifugal Pump 3.svg"
+    },
+    {
+      "nombre": "Electromagnetic",
+      "archivo": "04_Electromagnetic.svg",
+      "ruta": "imagenes/widgets/bombas/04_Electromagnetic.svg"
+    },
+    {
+      "nombre": "Feed Pump",
+      "archivo": "05_Feed Pump.svg",
+      "ruta": "imagenes/widgets/bombas/05_Feed Pump.svg"
+    },
+    {
+      "nombre": "Gear",
+      "archivo": "05_Gear.svg",
+      "ruta": "imagenes/widgets/bombas/05_Gear.svg"
+    },
+    {
+      "nombre": "Gas Blower",
+      "archivo": "06_Gas Blower.svg",
+      "ruta": "imagenes/widgets/bombas/06_Gas Blower.svg"
+    },
+    {
+      "nombre": "Hydraulic",
+      "archivo": "06_Hydraulic.svg",
+      "ruta": "imagenes/widgets/bombas/06_Hydraulic.svg"
+    },
+    {
+      "nombre": "Gas Compressor",
+      "archivo": "07_Gas Compressor.svg",
+      "ruta": "imagenes/widgets/bombas/07_Gas Compressor.svg"
+    },
+    {
+      "nombre": "Liquid Jet",
+      "archivo": "07_Liquid Jet.svg",
+      "ruta": "imagenes/widgets/bombas/07_Liquid Jet.svg"
+    },
+    {
+      "nombre": "Gear Pump",
+      "archivo": "08_Gear Pump.svg",
+      "ruta": "imagenes/widgets/bombas/08_Gear Pump.svg"
+    },
+    {
+      "nombre": "Reciprocating",
+      "archivo": "08_Reciprocating.svg",
+      "ruta": "imagenes/widgets/bombas/08_Reciprocating.svg"
+    },
+    {
+      "nombre": "Horizontal Pump",
+      "archivo": "09_Horizontal Pump.svg",
+      "ruta": "imagenes/widgets/bombas/09_Horizontal Pump.svg"
+    },
+    {
+      "nombre": "Rotary Piston",
+      "archivo": "09_Rotary Piston.svg",
+      "ruta": "imagenes/widgets/bombas/09_Rotary Piston.svg"
+    },
+    {
+      "nombre": "Injector",
+      "archivo": "10_Injector.svg",
+      "ruta": "imagenes/widgets/bombas/10_Injector.svg"
+    },
+    {
+      "nombre": "Screw",
+      "archivo": "10_Screw.svg",
+      "ruta": "imagenes/widgets/bombas/10_Screw.svg"
+    },
+    {
+      "nombre": "Peristaltic",
+      "archivo": "11_Peristaltic.svg",
+      "ruta": "imagenes/widgets/bombas/11_Peristaltic.svg"
+    },
+    {
+      "nombre": "Screw Pump",
+      "archivo": "12_Screw Pump.svg",
+      "ruta": "imagenes/widgets/bombas/12_Screw Pump.svg"
+    },
+    {
+      "nombre": "Screw Pump 2",
+      "archivo": "13_Screw Pump 2.svg",
+      "ruta": "imagenes/widgets/bombas/13_Screw Pump 2.svg"
+    },
+    {
+      "nombre": "Submersible Pump",
+      "archivo": "14_Submersible Pump.svg",
+      "ruta": "imagenes/widgets/bombas/14_Submersible Pump.svg"
+    },
+    {
+      "nombre": "Sump Pump",
+      "archivo": "15_Sump Pump.svg",
+      "ruta": "imagenes/widgets/bombas/15_Sump Pump.svg"
+    },
+    {
+      "nombre": "Turbine",
+      "archivo": "16_Turbine.svg",
+      "ruta": "imagenes/widgets/bombas/16_Turbine.svg"
+    },
+    {
+      "nombre": "Vacuum Pump",
+      "archivo": "17_Vacuum Pump.svg",
+      "ruta": "imagenes/widgets/bombas/17_Vacuum Pump.svg"
+    },
+    {
+      "nombre": "Vertical Pump",
+      "archivo": "18_Vertical Pump.svg",
+      "ruta": "imagenes/widgets/bombas/18_Vertical Pump.svg"
+    }
+  ],
+  "dinamicos": [
+    {
+      "nombre": "Soplador 3",
+      "archivo": "blower3.svg",
+      "ruta": "imagenes/widgets/dinamicos/blower3.svg"
+    },
+    {
+      "nombre": "Soplador 3 (inv.)",
+      "archivo": "blower3_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/blower3_flipped.svg"
+    },
+    {
+      "nombre": "Soplador 4",
+      "archivo": "blower4.svg",
+      "ruta": "imagenes/widgets/dinamicos/blower4.svg"
+    },
+    {
+      "nombre": "Soplador 4 (inv.)",
+      "archivo": "blower4_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/blower4_flipped.svg"
+    },
+    {
+      "nombre": "Válvula unidireccional cerrada",
+      "archivo": "checkvalve_closed.svg",
+      "ruta": "imagenes/widgets/dinamicos/checkvalve_closed.svg"
+    },
+    {
+      "nombre": "Válvula unidireccional cerrada (inv.)",
+      "archivo": "checkvalve_closed_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/checkvalve_closed_flipped.svg"
+    },
+    {
+      "nombre": "Válvula unidireccional abierta",
+      "archivo": "checkvalve_open.svg",
+      "ruta": "imagenes/widgets/dinamicos/checkvalve_open.svg"
+    },
+    {
+      "nombre": "Válvula unidireccional abierta (inv.)",
+      "archivo": "checkvalve_open_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/checkvalve_open_flipped.svg"
+    },
+    {
+      "nombre": "Compresor 3",
+      "archivo": "compressor3.svg",
+      "ruta": "imagenes/widgets/dinamicos/compressor3.svg"
+    },
+    {
+      "nombre": "Compresor 6",
+      "archivo": "compressor6.svg",
+      "ruta": "imagenes/widgets/dinamicos/compressor6.svg"
+    },
+    {
+      "nombre": "Condensador 3D",
+      "archivo": "condensor_3d_h1.svg",
+      "ruta": "imagenes/widgets/dinamicos/condensor_3d_h1.svg"
+    },
+    {
+      "nombre": "Banda transportadora",
+      "archivo": "conveyor.svg",
+      "ruta": "imagenes/widgets/dinamicos/conveyor.svg"
+    },
+    {
+      "nombre": "Banda transportadora 4",
+      "archivo": "conveyor4.svg",
+      "ruta": "imagenes/widgets/dinamicos/conveyor4.svg"
+    },
+    {
+      "nombre": "Banda inclinada bajada",
+      "archivo": "conveyor_20degdecline.svg",
+      "ruta": "imagenes/widgets/dinamicos/conveyor_20degdecline.svg"
+    },
+    {
+      "nombre": "Banda inclinada subida",
+      "archivo": "conveyor_20degincline.svg",
+      "ruta": "imagenes/widgets/dinamicos/conveyor_20degincline.svg"
+    },
+    {
+      "nombre": "Separador ciclónico",
+      "archivo": "cyclonicseparator.svg",
+      "ruta": "imagenes/widgets/dinamicos/cyclonicseparator.svg"
+    },
+    {
+      "nombre": "Aspas de ventilador",
+      "archivo": "fanblades.svg",
+      "ruta": "imagenes/widgets/dinamicos/fanblades.svg"
+    },
+    {
+      "nombre": "Brida 3D",
+      "archivo": "flange_3d_1.svg",
+      "ruta": "imagenes/widgets/dinamicos/flange_3d_1.svg"
+    },
+    {
+      "nombre": "Caudalímetro",
+      "archivo": "flowmeter.svg",
+      "ruta": "imagenes/widgets/dinamicos/flowmeter.svg"
+    },
+    {
+      "nombre": "Caudalímetro 1",
+      "archivo": "flowmeter1.svg",
+      "ruta": "imagenes/widgets/dinamicos/flowmeter1.svg"
+    },
+    {
+      "nombre": "Gauge dial 3D",
+      "archivo": "gaugedial_3d_h1.svg",
+      "ruta": "imagenes/widgets/dinamicos/gaugedial_3d_h1.svg"
+    },
+    {
+      "nombre": "Generador",
+      "archivo": "generator_1.svg",
+      "ruta": "imagenes/widgets/dinamicos/generator_1.svg"
+    },
+    {
+      "nombre": "Intercambiador tubo-tubo",
+      "archivo": "heatexchanger_pipetopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/heatexchanger_pipetopipe.svg"
+    },
+    {
+      "nombre": "Intercambiador carcasa-tubo",
+      "archivo": "heatexchanger_shelltube.svg",
+      "ruta": "imagenes/widgets/dinamicos/heatexchanger_shelltube.svg"
+    },
+    {
+      "nombre": "Intercambiador tubo sencillo",
+      "archivo": "heatexchanger_singlepipetopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/heatexchanger_singlepipetopipe.svg"
+    },
+    {
+      "nombre": "Medidor 3D H1",
+      "archivo": "meter_3d_h1.svg",
+      "ruta": "imagenes/widgets/dinamicos/meter_3d_h1.svg"
+    },
+    {
+      "nombre": "Medidor 3D H2",
+      "archivo": "meter_3d_h2.svg",
+      "ruta": "imagenes/widgets/dinamicos/meter_3d_h2.svg"
+    },
+    {
+      "nombre": "Mezclador",
+      "archivo": "mixer1.svg",
+      "ruta": "imagenes/widgets/dinamicos/mixer1.svg"
+    },
+    {
+      "nombre": "Motor",
+      "archivo": "motor.svg",
+      "ruta": "imagenes/widgets/dinamicos/motor.svg"
+    },
+    {
+      "nombre": "Motor 1",
+      "archivo": "motor1.svg",
+      "ruta": "imagenes/widgets/dinamicos/motor1.svg"
+    },
+    {
+      "nombre": "Motor 1 (inv.)",
+      "archivo": "motor1_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/motor1_flipped.svg"
+    },
+    {
+      "nombre": "Motor con eje",
+      "archivo": "motor_wshaft.svg",
+      "ruta": "imagenes/widgets/dinamicos/motor_wshaft.svg"
+    },
+    {
+      "nombre": "Codo de tubería 3D",
+      "archivo": "pipe_3d_elbow.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_elbow.svg"
+    },
+    {
+      "nombre": "Codo tubería 3D 2",
+      "archivo": "pipe_3d_elbow2.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_elbow2.svg"
+    },
+    {
+      "nombre": "Tubería 3D H1",
+      "archivo": "pipe_3d_h1.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_h1.svg"
+    },
+    {
+      "nombre": "Tubería 3D H2",
+      "archivo": "pipe_3d_h2.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_h2.svg"
+    },
+    {
+      "nombre": "Tubería 3D H3",
+      "archivo": "pipe_3d_h3.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_h3.svg"
+    },
+    {
+      "nombre": "Tubería intercambiador 1",
+      "archivo": "pipe_3d_heatexchange1.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_heatexchange1.svg"
+    },
+    {
+      "nombre": "Tubería intercambiador 2",
+      "archivo": "pipe_3d_heatexchange2.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_heatexchange2.svg"
+    },
+    {
+      "nombre": "Tubería intercambiador 3",
+      "archivo": "pipe_3d_heatexchange3.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_heatexchange3.svg"
+    },
+    {
+      "nombre": "Bifurcación T 3D",
+      "archivo": "pipe_3d_tjunction.svg",
+      "ruta": "imagenes/widgets/dinamicos/pipe_3d_tjunction.svg"
+    },
+    {
+      "nombre": "Redireccionador tubería",
+      "archivo": "piperedirect1.svg",
+      "ruta": "imagenes/widgets/dinamicos/piperedirect1.svg"
+    },
+    {
+      "nombre": "Redireccionador tubería (inv.)",
+      "archivo": "piperedirect1_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/piperedirect1_flipped.svg"
+    },
+    {
+      "nombre": "Regulador de presión",
+      "archivo": "pressure_regulator.svg",
+      "ruta": "imagenes/widgets/dinamicos/pressure_regulator.svg"
+    },
+    {
+      "nombre": "Amortiguador de pulsaciones",
+      "archivo": "pulsationdampener.svg",
+      "ruta": "imagenes/widgets/dinamicos/pulsationdampener.svg"
+    },
+    {
+      "nombre": "Bomba 1",
+      "archivo": "pump1.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump1.svg"
+    },
+    {
+      "nombre": "Bomba 2",
+      "archivo": "pump2.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump2.svg"
+    },
+    {
+      "nombre": "Bomba 2 (inv.)",
+      "archivo": "pump2_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump2_flipped.svg"
+    },
+    {
+      "nombre": "Bomba 3D 180°",
+      "archivo": "pump_3d_180.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump_3d_180.svg"
+    },
+    {
+      "nombre": "Bomba 3D 180° (inv.)",
+      "archivo": "pump_3d_180_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump_3d_180_flipped.svg"
+    },
+    {
+      "nombre": "Bomba 3D 90°",
+      "archivo": "pump_3d_90_1.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump_3d_90_1.svg"
+    },
+    {
+      "nombre": "Bomba 3D 90° (inv.)",
+      "archivo": "pump_3d_90_1_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump_3d_90_1_flipped.svg"
+    },
+    {
+      "nombre": "Bomba 3D ejemplo",
+      "archivo": "pump_3d_example.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump_3d_example.svg"
+    },
+    {
+      "nombre": "Bomba 3D recta",
+      "archivo": "pump_3d_straight1.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump_3d_straight1.svg"
+    },
+    {
+      "nombre": "Bomba 3D recta (inv.)",
+      "archivo": "pump_3d_straight1_flipped.svg",
+      "ruta": "imagenes/widgets/dinamicos/pump_3d_straight1_flipped.svg"
+    },
+    {
+      "nombre": "Cabezal bomba 3D",
+      "archivo": "pumphead_profile_3d.svg",
+      "ruta": "imagenes/widgets/dinamicos/pumphead_profile_3d.svg"
+    },
+    {
+      "nombre": "Reductor 3D 1",
+      "archivo": "reducer_3d_1.svg",
+      "ruta": "imagenes/widgets/dinamicos/reducer_3d_1.svg"
+    },
+    {
+      "nombre": "Reductor 3D 2",
+      "archivo": "reducer_3d_2.svg",
+      "ruta": "imagenes/widgets/dinamicos/reducer_3d_2.svg"
+    },
+    {
+      "nombre": "Sensor RTD",
+      "archivo": "sensor_rtd.svg",
+      "ruta": "imagenes/widgets/dinamicos/sensor_rtd.svg"
+    },
+    {
+      "nombre": "Sensor RTD silueta",
+      "archivo": "sensor_rtd_silhouette.svg",
+      "ruta": "imagenes/widgets/dinamicos/sensor_rtd_silhouette.svg"
+    },
+    {
+      "nombre": "Filtro canasta",
+      "archivo": "strainer_basket.svg",
+      "ruta": "imagenes/widgets/dinamicos/strainer_basket.svg"
+    },
+    {
+      "nombre": "Filtro canasta R",
+      "archivo": "strainer_basket_r.svg",
+      "ruta": "imagenes/widgets/dinamicos/strainer_basket_r.svg"
+    },
+    {
+      "nombre": "Filtro Y",
+      "archivo": "strainer_wye.svg",
+      "ruta": "imagenes/widgets/dinamicos/strainer_wye.svg"
+    },
+    {
+      "nombre": "Filtro Y R",
+      "archivo": "strainer_wye_r.svg",
+      "ruta": "imagenes/widgets/dinamicos/strainer_wye_r.svg"
+    },
+    {
+      "nombre": "Tanque 3D mediano",
+      "archivo": "tank_3d_medium_rtop1.svg",
+      "ruta": "imagenes/widgets/dinamicos/tank_3d_medium_rtop1.svg"
+    },
+    {
+      "nombre": "Tanque 3D vertical 1",
+      "archivo": "tank_3d_v1.svg",
+      "ruta": "imagenes/widgets/dinamicos/tank_3d_v1.svg"
+    },
+    {
+      "nombre": "Tanque 3D vertical 2",
+      "archivo": "tank_3d_v2.svg",
+      "ruta": "imagenes/widgets/dinamicos/tank_3d_v2.svg"
+    },
+    {
+      "nombre": "Tanque 3D vertical 4",
+      "archivo": "tank_3d_v4.svg",
+      "ruta": "imagenes/widgets/dinamicos/tank_3d_v4.svg"
+    },
+    {
+      "nombre": "Tanque 3D vertical 5",
+      "archivo": "tank_3d_v5.svg",
+      "ruta": "imagenes/widgets/dinamicos/tank_3d_v5.svg"
+    },
+    {
+      "nombre": "Tanque 3D vertical 6",
+      "archivo": "tank_3d_v6.svg",
+      "ruta": "imagenes/widgets/dinamicos/tank_3d_v6.svg"
+    },
+    {
+      "nombre": "Tanque 3D vertical 7",
+      "archivo": "tank_3d_v7.svg",
+      "ruta": "imagenes/widgets/dinamicos/tank_3d_v7.svg"
+    },
+    {
+      "nombre": "Turbina 1",
+      "archivo": "turbine1.svg",
+      "ruta": "imagenes/widgets/dinamicos/turbine1.svg"
+    },
+    {
+      "nombre": "Turbina 2",
+      "archivo": "turbine2.svg",
+      "ruta": "imagenes/widgets/dinamicos/turbine2.svg"
+    },
+    {
+      "nombre": "Turbina redondeada",
+      "archivo": "turbinerounded.svg",
+      "ruta": "imagenes/widgets/dinamicos/turbinerounded.svg"
+    },
+    {
+      "nombre": "Válvula 1 vía abajo",
+      "archivo": "valve_1path_down.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_1path_down.svg"
+    },
+    {
+      "nombre": "Válvula 3D 3 vías",
+      "archivo": "valve_3d_3way1.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_3way1.svg"
+    },
+    {
+      "nombre": "Válvula 3D 3 vías (sin tubería)",
+      "archivo": "valve_3d_3way1_nopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_3way1_nopipe.svg"
+    },
+    {
+      "nombre": "Válvula 3D 4 vías",
+      "archivo": "valve_3d_4way1.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_4way1.svg"
+    },
+    {
+      "nombre": "Válvula 3D 4 vías (sin tubería)",
+      "archivo": "valve_3d_4way1_nopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_4way1_nopipe.svg"
+    },
+    {
+      "nombre": "Válvula 3D angular 1",
+      "archivo": "valve_3d_angled1.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_angled1.svg"
+    },
+    {
+      "nombre": "Válvula 3D angular 1 (sin tubería)",
+      "archivo": "valve_3d_angled1_nopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_angled1_nopipe.svg"
+    },
+    {
+      "nombre": "Válvula 3D angular 2",
+      "archivo": "valve_3d_angled2.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_angled2.svg"
+    },
+    {
+      "nombre": "Válvula 3D angular 2 (sin tubería)",
+      "archivo": "valve_3d_angled2_nopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_angled2_nopipe.svg"
+    },
+    {
+      "nombre": "Válvula 3D común 1",
+      "archivo": "valve_3d_common1.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_common1.svg"
+    },
+    {
+      "nombre": "Válvula 3D común 2",
+      "archivo": "valve_3d_common2.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_common2.svg"
+    },
+    {
+      "nombre": "Válvula 3D común 2 (sin tubería)",
+      "archivo": "valve_3d_common2_nopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_common2_nopipe.svg"
+    },
+    {
+      "nombre": "Válvula 3D común 3",
+      "archivo": "valve_3d_common3.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_common3.svg"
+    },
+    {
+      "nombre": "Válvula 3D común 4",
+      "archivo": "valve_3d_common4.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_common4.svg"
+    },
+    {
+      "nombre": "Válvula 3D común 4 (sin tubería)",
+      "archivo": "valve_3d_common4_nopipe.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_common4_nopipe.svg"
+    },
+    {
+      "nombre": "Válvula 3D horizontal 1",
+      "archivo": "valve_3d_h1.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_h1.svg"
+    },
+    {
+      "nombre": "Válvula 3D h2 cerrada",
+      "archivo": "valve_3d_h2_closed.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_h2_closed.svg"
+    },
+    {
+      "nombre": "Válvula 3D h2 abierta",
+      "archivo": "valve_3d_h2_open.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_3d_h2_open.svg"
+    },
+    {
+      "nombre": "Válvula circular",
+      "archivo": "valve_circle.svg",
+      "ruta": "imagenes/widgets/dinamicos/valve_circle.svg"
+    }
+  ],
+  "instrumentos": [
+    {
+      "nombre": "Averging Pitot Tube",
+      "archivo": "01_Averging Pitot Tube.svg",
+      "ruta": "imagenes/widgets/instrumentos/01_Averging Pitot Tube.svg"
+    },
+    {
+      "nombre": "Discrete Instrument (control room)",
+      "archivo": "01_Discrete Instrument (control room).svg",
+      "ruta": "imagenes/widgets/instrumentos/01_Discrete Instrument (control room).svg"
+    },
+    {
+      "nombre": "Coriolis",
+      "archivo": "02_Coriolis.svg",
+      "ruta": "imagenes/widgets/instrumentos/02_Coriolis.svg"
+    },
+    {
+      "nombre": "Discrete Instrument (field)",
+      "archivo": "02_Discrete Instrument (field).svg",
+      "ruta": "imagenes/widgets/instrumentos/02_Discrete Instrument (field).svg"
+    },
+    {
+      "nombre": "Discrete Instrument (inaccessible)",
+      "archivo": "03_Discrete Instrument (inaccessible).svg",
+      "ruta": "imagenes/widgets/instrumentos/03_Discrete Instrument (inaccessible).svg"
+    },
+    {
+      "nombre": "Flow Nozzle",
+      "archivo": "03_Flow Nozzle.svg",
+      "ruta": "imagenes/widgets/instrumentos/03_Flow Nozzle.svg"
+    },
+    {
+      "nombre": "Discrete Instrument (local panel)",
+      "archivo": "04_Discrete Instrument (local panel).svg",
+      "ruta": "imagenes/widgets/instrumentos/04_Discrete Instrument (local panel).svg"
+    },
+    {
+      "nombre": "Flume",
+      "archivo": "04_Flume.svg",
+      "ruta": "imagenes/widgets/instrumentos/04_Flume.svg"
+    },
+    {
+      "nombre": "Magnetic",
+      "archivo": "05_Magnetic.svg",
+      "ruta": "imagenes/widgets/instrumentos/05_Magnetic.svg"
+    },
+    {
+      "nombre": "Shared Control_Display in DCS (control room)",
+      "archivo": "05_Shared Control_Display in DCS (control room).svg",
+      "ruta": "imagenes/widgets/instrumentos/05_Shared Control_Display in DCS (control room).svg"
+    },
+    {
+      "nombre": "Pitot Tube",
+      "archivo": "06_Pitot Tube.svg",
+      "ruta": "imagenes/widgets/instrumentos/06_Pitot Tube.svg"
+    },
+    {
+      "nombre": "Shared Control_Display in DCS (field)",
+      "archivo": "06_Shared Control_Display in DCS (field).svg",
+      "ruta": "imagenes/widgets/instrumentos/06_Shared Control_Display in DCS (field).svg"
+    },
+    {
+      "nombre": "Positive Displacement",
+      "archivo": "07_Positive Displacement.svg",
+      "ruta": "imagenes/widgets/instrumentos/07_Positive Displacement.svg"
+    },
+    {
+      "nombre": "Shared Control_Display in DCS (inaccessible)",
+      "archivo": "07_Shared Control_Display in DCS (inaccessible).svg",
+      "ruta": "imagenes/widgets/instrumentos/07_Shared Control_Display in DCS (inaccessible).svg"
+    },
+    {
+      "nombre": "Rotameter",
+      "archivo": "08_Rotameter.svg",
+      "ruta": "imagenes/widgets/instrumentos/08_Rotameter.svg"
+    },
+    {
+      "nombre": "Shared Control_Display in DCS (local panel)",
+      "archivo": "08_Shared Control_Display in DCS (local panel).svg",
+      "ruta": "imagenes/widgets/instrumentos/08_Shared Control_Display in DCS (local panel).svg"
+    },
+    {
+      "nombre": "Computer Function (control room)",
+      "archivo": "09_Computer Function (control room).svg",
+      "ruta": "imagenes/widgets/instrumentos/09_Computer Function (control room).svg"
+    },
+    {
+      "nombre": "Target",
+      "archivo": "09_Target.svg",
+      "ruta": "imagenes/widgets/instrumentos/09_Target.svg"
+    },
+    {
+      "nombre": "Computer Function (field)",
+      "archivo": "10_Computer Function (field).svg",
+      "ruta": "imagenes/widgets/instrumentos/10_Computer Function (field).svg"
+    },
+    {
+      "nombre": "Turbine",
+      "archivo": "10_Turbine.svg",
+      "ruta": "imagenes/widgets/instrumentos/10_Turbine.svg"
+    },
+    {
+      "nombre": "Computer Function (inaccessible)",
+      "archivo": "11_Computer Function (inaccessible).svg",
+      "ruta": "imagenes/widgets/instrumentos/11_Computer Function (inaccessible).svg"
+    },
+    {
+      "nombre": "Ultrasonic",
+      "archivo": "11_Ultrasonic.svg",
+      "ruta": "imagenes/widgets/instrumentos/11_Ultrasonic.svg"
+    },
+    {
+      "nombre": "Computer Function (local panel)",
+      "archivo": "12_Computer Function (local panel).svg",
+      "ruta": "imagenes/widgets/instrumentos/12_Computer Function (local panel).svg"
+    },
+    {
+      "nombre": "V-cone",
+      "archivo": "12_V-cone.svg",
+      "ruta": "imagenes/widgets/instrumentos/12_V-cone.svg"
+    },
+    {
+      "nombre": "Programmable Logic Control (control room)",
+      "archivo": "13_Programmable Logic Control (control room).svg",
+      "ruta": "imagenes/widgets/instrumentos/13_Programmable Logic Control (control room).svg"
+    },
+    {
+      "nombre": "Venturi",
+      "archivo": "13_Venturi.svg",
+      "ruta": "imagenes/widgets/instrumentos/13_Venturi.svg"
+    },
+    {
+      "nombre": "Programmable Logic Control (field)",
+      "archivo": "14_Programmable Logic Control (field).svg",
+      "ruta": "imagenes/widgets/instrumentos/14_Programmable Logic Control (field).svg"
+    },
+    {
+      "nombre": "Vortex",
+      "archivo": "14_Vortex.svg",
+      "ruta": "imagenes/widgets/instrumentos/14_Vortex.svg"
+    },
+    {
+      "nombre": "Programmable Logic Control (inaccessible)",
+      "archivo": "15_Programmable Logic Control (inaccessible).svg",
+      "ruta": "imagenes/widgets/instrumentos/15_Programmable Logic Control (inaccessible).svg"
+    },
+    {
+      "nombre": "Wedge",
+      "archivo": "15_Wedge.svg",
+      "ruta": "imagenes/widgets/instrumentos/15_Wedge.svg"
+    },
+    {
+      "nombre": "Programmable Logic Control (local panel)",
+      "archivo": "16_Programmable Logic Control (local panel).svg",
+      "ruta": "imagenes/widgets/instrumentos/16_Programmable Logic Control (local panel).svg"
+    },
+    {
+      "nombre": "Weir",
+      "archivo": "16_Weir.svg",
+      "ruta": "imagenes/widgets/instrumentos/16_Weir.svg"
+    },
+    {
+      "nombre": "Logic (control room)",
+      "archivo": "17_Logic (control room).svg",
+      "ruta": "imagenes/widgets/instrumentos/17_Logic (control room).svg"
+    },
+    {
+      "nombre": "Logic (field)",
+      "archivo": "18_Logic (field).svg",
+      "ruta": "imagenes/widgets/instrumentos/18_Logic (field).svg"
+    },
+    {
+      "nombre": "Logic (inaccessible)",
+      "archivo": "19_Logic (inaccessible).svg",
+      "ruta": "imagenes/widgets/instrumentos/19_Logic (inaccessible).svg"
+    },
+    {
+      "nombre": "Logic (local panel)",
+      "archivo": "20_Logic (local panel).svg",
+      "ruta": "imagenes/widgets/instrumentos/20_Logic (local panel).svg"
+    },
+    {
+      "nombre": "Indicator (Instrument)",
+      "archivo": "21_Indicator (Instrument).svg",
+      "ruta": "imagenes/widgets/instrumentos/21_Indicator (Instrument).svg"
+    },
+    {
+      "nombre": "Indicator (Control)",
+      "archivo": "22_Indicator (Control).svg",
+      "ruta": "imagenes/widgets/instrumentos/22_Indicator (Control).svg"
+    },
+    {
+      "nombre": "Indicator (Function)",
+      "archivo": "23_Indicator (Function).svg",
+      "ruta": "imagenes/widgets/instrumentos/23_Indicator (Function).svg"
+    },
+    {
+      "nombre": "Indicator (PLC)",
+      "archivo": "24_Indicator (PLC).svg",
+      "ruta": "imagenes/widgets/instrumentos/24_Indicator (PLC).svg"
+    }
+  ],
+  "motores": [
+    {
+      "nombre": "Electric Motor",
+      "archivo": "01_Electric Motor.svg",
+      "ruta": "imagenes/widgets/motores/01_Electric Motor.svg"
+    },
+    {
+      "nombre": "Electric Motor (AC)",
+      "archivo": "02_Electric Motor (AC).svg",
+      "ruta": "imagenes/widgets/motores/02_Electric Motor (AC).svg"
+    },
+    {
+      "nombre": "Electric Motor (DC)",
+      "archivo": "03_Electric Motor (DC).svg",
+      "ruta": "imagenes/widgets/motores/03_Electric Motor (DC).svg"
+    },
+    {
+      "nombre": "Gear",
+      "archivo": "04_Gear.svg",
+      "ruta": "imagenes/widgets/motores/04_Gear.svg"
+    },
+    {
+      "nombre": "Generator",
+      "archivo": "05_Generator.svg",
+      "ruta": "imagenes/widgets/motores/05_Generator.svg"
+    },
+    {
+      "nombre": "Generator (AC)",
+      "archivo": "06_Generator (AC).svg",
+      "ruta": "imagenes/widgets/motores/06_Generator (AC).svg"
+    },
+    {
+      "nombre": "Generator (DC)",
+      "archivo": "07_Generator (DC).svg",
+      "ruta": "imagenes/widgets/motores/07_Generator (DC).svg"
+    },
+    {
+      "nombre": "Turbine",
+      "archivo": "08_Turbine.svg",
+      "ruta": "imagenes/widgets/motores/08_Turbine.svg"
+    }
+  ],
+  "tanques": [
+    {
+      "nombre": "circularTankLevel-v3",
+      "archivo": "circularTankLevel-v3.svg",
+      "ruta": "imagenes/widgets/tanques/circularTankLevel-v3.svg"
+    },
+    {
+      "nombre": "squareTankLevel-v3",
+      "archivo": "squareTankLevel-v3.svg",
+      "ruta": "imagenes/widgets/tanques/squareTankLevel-v3.svg"
+    }
+  ],
+  "tuberias": [
+    {
+      "nombre": "Basket Strainer",
+      "archivo": "01_Basket Strainer.svg",
+      "ruta": "imagenes/widgets/tuberias/01_Basket Strainer.svg"
+    },
+    {
+      "nombre": "Blank",
+      "archivo": "02_Blank.svg",
+      "ruta": "imagenes/widgets/tuberias/02_Blank.svg"
+    },
+    {
+      "nombre": "Breather",
+      "archivo": "03_Breather.svg",
+      "ruta": "imagenes/widgets/tuberias/03_Breather.svg"
+    },
+    {
+      "nombre": "Cap",
+      "archivo": "04_Cap.svg",
+      "ruta": "imagenes/widgets/tuberias/04_Cap.svg"
+    },
+    {
+      "nombre": "Closed Figure 8 Blind",
+      "archivo": "05_Closed Figure 8 Blind.svg",
+      "ruta": "imagenes/widgets/tuberias/05_Closed Figure 8 Blind.svg"
+    },
+    {
+      "nombre": "Concentric Reducer",
+      "archivo": "06_Concentric Reducer.svg",
+      "ruta": "imagenes/widgets/tuberias/06_Concentric Reducer.svg"
+    },
+    {
+      "nombre": "Cone Strainer",
+      "archivo": "07_Cone Strainer.svg",
+      "ruta": "imagenes/widgets/tuberias/07_Cone Strainer.svg"
+    },
+    {
+      "nombre": "Damper",
+      "archivo": "08_Damper.svg",
+      "ruta": "imagenes/widgets/tuberias/08_Damper.svg"
+    },
+    {
+      "nombre": "Desuper Heater",
+      "archivo": "09_Desuper Heater.svg",
+      "ruta": "imagenes/widgets/tuberias/09_Desuper Heater.svg"
+    },
+    {
+      "nombre": "Detonation Arrestor",
+      "archivo": "10_Detonation Arrestor.svg",
+      "ruta": "imagenes/widgets/tuberias/10_Detonation Arrestor.svg"
+    },
+    {
+      "nombre": "Diverter Valve",
+      "archivo": "11_Diverter Valve.svg",
+      "ruta": "imagenes/widgets/tuberias/11_Diverter Valve.svg"
+    },
+    {
+      "nombre": "Double Flange",
+      "archivo": "12_Double Flange.svg",
+      "ruta": "imagenes/widgets/tuberias/12_Double Flange.svg"
+    },
+    {
+      "nombre": "Duplex Strainer",
+      "archivo": "13_Duplex Strainer.svg",
+      "ruta": "imagenes/widgets/tuberias/13_Duplex Strainer.svg"
+    },
+    {
+      "nombre": "Eccentric Reducer",
+      "archivo": "14_Eccentric Reducer.svg",
+      "ruta": "imagenes/widgets/tuberias/14_Eccentric Reducer.svg"
+    },
+    {
+      "nombre": "Excess Flow Valve",
+      "archivo": "15_Excess Flow Valve.svg",
+      "ruta": "imagenes/widgets/tuberias/15_Excess Flow Valve.svg"
+    },
+    {
+      "nombre": "Exhaust Head",
+      "archivo": "16_Exhaust Head.svg",
+      "ruta": "imagenes/widgets/tuberias/16_Exhaust Head.svg"
+    },
+    {
+      "nombre": "Expansion Joint",
+      "archivo": "17_Expansion Joint.svg",
+      "ruta": "imagenes/widgets/tuberias/17_Expansion Joint.svg"
+    },
+    {
+      "nombre": "Flame Arrestor",
+      "archivo": "18_Flame Arrestor.svg",
+      "ruta": "imagenes/widgets/tuberias/18_Flame Arrestor.svg"
+    },
+    {
+      "nombre": "Flange",
+      "archivo": "19_Flange.svg",
+      "ruta": "imagenes/widgets/tuberias/19_Flange.svg"
+    },
+    {
+      "nombre": "Flange In",
+      "archivo": "20_Flange In.svg",
+      "ruta": "imagenes/widgets/tuberias/20_Flange In.svg"
+    },
+    {
+      "nombre": "Flexible Hose",
+      "archivo": "21_Flexible Hose.svg",
+      "ruta": "imagenes/widgets/tuberias/21_Flexible Hose.svg"
+    },
+    {
+      "nombre": "Hose Connection",
+      "archivo": "22_Hose Connection.svg",
+      "ruta": "imagenes/widgets/tuberias/22_Hose Connection.svg"
+    },
+    {
+      "nombre": "In-Line Mixer",
+      "archivo": "23_In-Line Mixer.svg",
+      "ruta": "imagenes/widgets/tuberias/23_In-Line Mixer.svg"
+    },
+    {
+      "nombre": "In-Line Silencer",
+      "archivo": "24_In-Line Silencer.svg",
+      "ruta": "imagenes/widgets/tuberias/24_In-Line Silencer.svg"
+    },
+    {
+      "nombre": "Open Figure 8 Blind",
+      "archivo": "25_Open Figure 8 Blind.svg",
+      "ruta": "imagenes/widgets/tuberias/25_Open Figure 8 Blind.svg"
+    },
+    {
+      "nombre": "Orifice (Quick Change)",
+      "archivo": "26_Orifice (Quick Change).svg",
+      "ruta": "imagenes/widgets/tuberias/26_Orifice (Quick Change).svg"
+    },
+    {
+      "nombre": "Plug",
+      "archivo": "27_Plug.svg",
+      "ruta": "imagenes/widgets/tuberias/27_Plug.svg"
+    },
+    {
+      "nombre": "Pulsation Dampener",
+      "archivo": "28_Pulsation Dampener.svg",
+      "ruta": "imagenes/widgets/tuberias/28_Pulsation Dampener.svg"
+    },
+    {
+      "nombre": "Removable Spool",
+      "archivo": "29_Removable Spool.svg",
+      "ruta": "imagenes/widgets/tuberias/29_Removable Spool.svg"
+    },
+    {
+      "nombre": "Rotary Valve",
+      "archivo": "30_Rotary Valve.svg",
+      "ruta": "imagenes/widgets/tuberias/30_Rotary Valve.svg"
+    },
+    {
+      "nombre": "Spacer",
+      "archivo": "31_Spacer.svg",
+      "ruta": "imagenes/widgets/tuberias/31_Spacer.svg"
+    },
+    {
+      "nombre": "Steam Trap",
+      "archivo": "32_Steam Trap.svg",
+      "ruta": "imagenes/widgets/tuberias/32_Steam Trap.svg"
+    },
+    {
+      "nombre": "T-Type Strainer",
+      "archivo": "33_T-Type Strainer.svg",
+      "ruta": "imagenes/widgets/tuberias/33_T-Type Strainer.svg"
+    },
+    {
+      "nombre": "Temporary Strainer",
+      "archivo": "34_Temporary Strainer.svg",
+      "ruta": "imagenes/widgets/tuberias/34_Temporary Strainer.svg"
+    },
+    {
+      "nombre": "Vent Silencer",
+      "archivo": "35_Vent Silencer.svg",
+      "ruta": "imagenes/widgets/tuberias/35_Vent Silencer.svg"
+    },
+    {
+      "nombre": "Welded Connection",
+      "archivo": "36_Welded Connection.svg",
+      "ruta": "imagenes/widgets/tuberias/36_Welded Connection.svg"
+    },
+    {
+      "nombre": "Y-Type Strainer",
+      "archivo": "37_Y-Type Strainer.svg",
+      "ruta": "imagenes/widgets/tuberias/37_Y-Type Strainer.svg"
+    }
+  ],
+  "valvulas": [
+    {
+      "nombre": "Gate Valve",
+      "archivo": "01_Gate Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/01_Gate Valve.svg"
+    },
+    {
+      "nombre": "Normally Closed Gate Valve",
+      "archivo": "02_Normally Closed Gate Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/02_Normally Closed Gate Valve.svg"
+    },
+    {
+      "nombre": "Ball Valve",
+      "archivo": "03_Ball Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/03_Ball Valve.svg"
+    },
+    {
+      "nombre": "Normally Closed Ball Valve",
+      "archivo": "04_Normally Closed Ball Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/04_Normally Closed Ball Valve.svg"
+    },
+    {
+      "nombre": "Globe Valve",
+      "archivo": "05_Globe Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/05_Globe Valve.svg"
+    },
+    {
+      "nombre": "Butterfly Valve",
+      "archivo": "06_Butterfly Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/06_Butterfly Valve.svg"
+    },
+    {
+      "nombre": "Check Valve",
+      "archivo": "07_Check Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/07_Check Valve.svg"
+    },
+    {
+      "nombre": "Plug Valve",
+      "archivo": "08_Plug Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/08_Plug Valve.svg"
+    },
+    {
+      "nombre": "Needle Valve",
+      "archivo": "09_Needle Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/09_Needle Valve.svg"
+    },
+    {
+      "nombre": "Self Draining Valve",
+      "archivo": "10_Self Draining Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/10_Self Draining Valve.svg"
+    },
+    {
+      "nombre": "Gate Valve (Manual)",
+      "archivo": "11_Gate Valve (Manual).svg",
+      "ruta": "imagenes/widgets/valvulas/11_Gate Valve (Manual).svg"
+    },
+    {
+      "nombre": "Gate Valve (Diaphragm)",
+      "archivo": "12_Gate Valve (Diaphragm).svg",
+      "ruta": "imagenes/widgets/valvulas/12_Gate Valve (Diaphragm).svg"
+    },
+    {
+      "nombre": "Gate Valve (Balanced Diaphragm)",
+      "archivo": "13_Gate Valve (Balanced Diaphragm).svg",
+      "ruta": "imagenes/widgets/valvulas/13_Gate Valve (Balanced Diaphragm).svg"
+    },
+    {
+      "nombre": "Gate Valve (Powered)",
+      "archivo": "14_Gate Valve (Powered).svg",
+      "ruta": "imagenes/widgets/valvulas/14_Gate Valve (Powered).svg"
+    },
+    {
+      "nombre": "Gate Valve (Digital)",
+      "archivo": "15_Gate Valve (Digital).svg",
+      "ruta": "imagenes/widgets/valvulas/15_Gate Valve (Digital).svg"
+    },
+    {
+      "nombre": "Gate Valve (Electro-Hydraulic)",
+      "archivo": "16_Gate Valve (Electro-Hydraulic).svg",
+      "ruta": "imagenes/widgets/valvulas/16_Gate Valve (Electro-Hydraulic).svg"
+    },
+    {
+      "nombre": "Gate Valve (Key)",
+      "archivo": "17_Gate Valve (Key).svg",
+      "ruta": "imagenes/widgets/valvulas/17_Gate Valve (Key).svg"
+    },
+    {
+      "nombre": "Gate Valve (Motor)",
+      "archivo": "18_Gate Valve (Motor).svg",
+      "ruta": "imagenes/widgets/valvulas/18_Gate Valve (Motor).svg"
+    },
+    {
+      "nombre": "Gate Valve (Pilot)",
+      "archivo": "19_Gate Valve (Pilot).svg",
+      "ruta": "imagenes/widgets/valvulas/19_Gate Valve (Pilot).svg"
+    },
+    {
+      "nombre": "Gate Valve (Solenoid)",
+      "archivo": "20_Gate Valve (Solenoid).svg",
+      "ruta": "imagenes/widgets/valvulas/20_Gate Valve (Solenoid).svg"
+    },
+    {
+      "nombre": "Gate Valve (Solenoid With Manual Reset)",
+      "archivo": "21_Gate Valve (Solenoid With Manual Reset).svg",
+      "ruta": "imagenes/widgets/valvulas/21_Gate Valve (Solenoid With Manual Reset).svg"
+    },
+    {
+      "nombre": "Gate Valve (Spring)",
+      "archivo": "22_Gate Valve (Spring).svg",
+      "ruta": "imagenes/widgets/valvulas/22_Gate Valve (Spring).svg"
+    },
+    {
+      "nombre": "Gate Valve (Weight)",
+      "archivo": "23_Gate Valve (Weight).svg",
+      "ruta": "imagenes/widgets/valvulas/23_Gate Valve (Weight).svg"
+    },
+    {
+      "nombre": "Gate Valve (Single Acting Cylinder)",
+      "archivo": "24_Gate Valve (Single Acting Cylinder).svg",
+      "ruta": "imagenes/widgets/valvulas/24_Gate Valve (Single Acting Cylinder).svg"
+    },
+    {
+      "nombre": "Gate Valve (Double Acting Cylinder)",
+      "archivo": "25_Gate Valve (Double Acting Cylinder).svg",
+      "ruta": "imagenes/widgets/valvulas/25_Gate Valve (Double Acting Cylinder).svg"
+    },
+    {
+      "nombre": "Angle Blowdown Valve",
+      "archivo": "26_Angle Blowdown Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/26_Angle Blowdown Valve.svg"
+    },
+    {
+      "nombre": "Integrated Block and Bleed Valve",
+      "archivo": "27_Integrated Block and Bleed Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/27_Integrated Block and Bleed Valve.svg"
+    },
+    {
+      "nombre": "Integrated Block and Bleed Valve (Manual)",
+      "archivo": "28_Integrated Block and Bleed Valve (Manual).svg",
+      "ruta": "imagenes/widgets/valvulas/28_Integrated Block and Bleed Valve (Manual).svg"
+    },
+    {
+      "nombre": "Angle Valve",
+      "archivo": "29_Angle Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/29_Angle Valve.svg"
+    },
+    {
+      "nombre": "Angle Valve (Manual)",
+      "archivo": "30_Angle Valve (Manual).svg",
+      "ruta": "imagenes/widgets/valvulas/30_Angle Valve (Manual).svg"
+    },
+    {
+      "nombre": "Angle Globe Valve",
+      "archivo": "31_Angle Globe Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/31_Angle Globe Valve.svg"
+    },
+    {
+      "nombre": "Angle Globe Valve (Manual)",
+      "archivo": "32_Angle Globe Valve (Manual).svg",
+      "ruta": "imagenes/widgets/valvulas/32_Angle Globe Valve (Manual).svg"
+    },
+    {
+      "nombre": "3 Way Valve",
+      "archivo": "33_3 Way Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/33_3 Way Valve.svg"
+    },
+    {
+      "nombre": "3 Way Valve (Manual)",
+      "archivo": "34_3 Way Valve (Manual).svg",
+      "ruta": "imagenes/widgets/valvulas/34_3 Way Valve (Manual).svg"
+    },
+    {
+      "nombre": "Auto Recirculation Valve",
+      "archivo": "35_Auto Recirculation Valve.svg",
+      "ruta": "imagenes/widgets/valvulas/35_Auto Recirculation Valve.svg"
+    }
+  ]
+}

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vista Planta</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/tag-manager.js"></script>
+<script src="assets/js/widget-library.js"></script>
+<style>
+body { margin:0; overflow:hidden; background:#0a0f1a; }
+
+/* ── Barra superior mínima ── */
+.view-bar {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  height:44px; background:rgba(10,15,26,.92); backdrop-filter:blur(8px);
+  border-bottom:2px solid var(--accent);
+  display:flex; align-items:center; padding:0 14px; gap:10px;
+}
+.view-bar .logo { display:flex;align-items:center;gap:8px;text-decoration:none; }
+.view-bar .logo img { width:28px;height:28px;border-radius:6px;object-fit:cover;object-position:center 15%; }
+.view-bar .planta-nm { font-size:12px;font-weight:800;color:var(--accent); }
+.view-bar .sep { width:1px;height:22px;background:rgba(255,255,255,.1); }
+.view-bar .sp { flex:1; }
+.view-badge {
+  background:rgba(20,184,166,.12);border:1px solid var(--accent);
+  color:var(--accent);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:800;
+  letter-spacing:.5px;
+}
+.view-clock { font-family:monospace;font-size:13px;color:var(--muted); }
+.vbtn {
+  padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;
+  border:1px solid;cursor:pointer;transition:.12s;display:flex;align-items:center;gap:5px;
+}
+.vbtn.back { background:none;border-color:rgba(255,255,255,.15);color:#8d96a0; }
+.vbtn.back:hover { border-color:var(--accent);color:var(--accent); }
+.vbtn.sim { background:rgba(99,102,241,.1);border-color:#6366f1;color:#6366f1; }
+.vbtn.sim.active { background:#6366f1;color:#fff; }
+
+/* ── Canvas ── */
+.view-canvas-wrap {
+  position:fixed; top:44px; left:0; right:0; bottom:0;
+  overflow:auto; background:var(--bg2);
+}
+#viewCanvas {
+  position:relative; width:1500px; height:950px; margin:20px;
+  background:#fff; box-shadow:0 6px 32px rgba(0,0,0,.25);
+}
+[data-tema="dark"] #viewCanvas { background:#1e2a3a; }
+
+/* ── Widgets en vista ── */
+.hmi-w {
+  position:absolute; user-select:none; box-sizing:border-box;
+  cursor:default;
+}
+.hmi-w.interactivo { cursor:pointer; }
+.w-content { width:100%;height:100%;pointer-events:none; }
+.hmi-w.interactivo .w-content { pointer-events:auto; }
+.wlabel {
+  position:absolute;bottom:-17px;left:0;right:0;text-align:center;
+  font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;pointer-events:none;
+}
+
+/* ── Simulador lateral ── */
+.sim-panel {
+  position:fixed;top:44px;right:0;bottom:0;width:280px;
+  background:var(--panel);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;z-index:150;
+  transform:translateX(100%);transition:transform .25s;
+}
+.sim-panel.open { transform:translateX(0); }
+.sim-head { padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;
+            display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800; }
+.sim-body { flex:1;overflow-y:auto;padding:8px 10px; }
+.sim-row {
+  display:grid;grid-template-columns:1fr auto auto;
+  align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);
+  font-size:11px;
+}
+.sim-label { color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.sim-input-range { width:100%;accent-color:var(--accent); }
+
+/* ── Status ── */
+.view-status {
+  position:fixed;bottom:0;left:0;right:0;height:22px;
+  background:var(--panel);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:16px;
+  font-size:10px;color:var(--muted);z-index:200;
+}
+.status-dot { width:8px;height:8px;border-radius:50%;background:var(--green); }
+.status-dot.err { background:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ── Barra superior ─────────────────── -->
+<header class="view-bar">
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" alt="">
+    <span class="planta-nm" id="viewNombrePlanta">Cargando...</span>
+  </a>
+  <div class="sep"></div>
+  <span class="view-badge">▶ EJECUCIÓN</span>
+  <div class="sp"></div>
+  <span class="view-clock" id="viewClock">00:00:00</span>
+  <button class="vbtn sim" id="btnSim" onclick="toggleSim()">
+    <i class="fa-solid fa-sliders"></i> Simulador
+  </button>
+  <a href="hmi.html" class="vbtn back"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+</header>
+
+<!-- ── Canvas de ejecución ────────────── -->
+<div class="view-canvas-wrap">
+  <div id="viewCanvas"></div>
+</div>
+
+<!-- ── Simulador lateral ──────────────── -->
+<div class="sim-panel" id="simPanel">
+  <div class="sim-head">
+    <i class="fa-solid fa-sliders" style="color:var(--accent)"></i> Simulador de Tags
+    <button style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer"
+            onclick="toggleSim()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="sim-body" id="simBody"></div>
+</div>
+
+<!-- ── Barra de estado ────────────────── -->
+<div class="view-status">
+  <div class="status-dot" id="statusDot"></div>
+  <span id="statusTxt">Conectando...</span>
+  <span style="margin-left:auto">
+    <span id="statusWidgets">0</span> widgets ·
+    <span id="statusTags">0</span> tags activos
+  </span>
+</div>
+
+<script>
+const URL_B  = 'https://planta-backend-ifsy.onrender.com';
+const TK     = localStorage.getItem('hmi_token');
+const ROL    = localStorage.getItem('hmi_role');
+const PARAMS = new URLSearchParams(location.search);
+const PID    = PARAMS.get('planta');
+
+if (!TK || !PID) location.href = 'hmi.html';
+
+// ── Estado ────────────────────────────────────────
+let widgets    = [];
+let simVisible = false;
+let syncOK     = false;
+
+// ── API ───────────────────────────────────────────
+async function api(path, opts={}) {
+  opts.headers = { ...(opts.headers||{}), 'Authorization':'Bearer '+TK };
+  try {
+    const r = await fetch(URL_B + path, opts);
+    if (r.status === 401) { localStorage.clear(); location.href='login.html'; return null; }
+    const ct = r.headers.get('content-type')||'';
+    return ct.includes('json') ? r.json() : null;
+  } catch(e) { return null; }
+}
+
+// ── Cargar la planta ──────────────────────────────
+async function cargarPlanta() {
+  const planta = await api('/api/plantas/' + PID);
+  if (!planta) {
+    document.getElementById('statusTxt').textContent = 'Error al cargar la planta';
+    document.getElementById('statusDot').className = 'status-dot err';
+    return;
+  }
+  document.getElementById('viewNombrePlanta').textContent = planta.nombre;
+  document.title = 'Vista — ' + planta.nombre;
+
+  // Inicializar TagManager para esta planta
+  TagManager.init(PID);
+
+  // Cargar layout
+  if (planta.layout_json && planta.layout_json !== '{}') {
+    try {
+      const layout = JSON.parse(planta.layout_json);
+      // Importar tags guardados con el layout
+      if (layout.tagData) TagManager.importFromLayout(layout.tagData);
+      widgets = layout.widgets || [];
+      renderearTodo();
+    } catch(e) {
+      console.error('[View] Error al cargar layout:', e);
+    }
+  }
+
+  // Escuchar cambios de tags → actualizar widgets
+  document.addEventListener('tm:changed', onTagChanged);
+
+  // Suscribir cada widget a su tag
+  widgets.forEach(bindWidgetATag);
+
+  document.getElementById('statusWidgets').textContent = widgets.length;
+  document.getElementById('statusTags').textContent    = TagManager.getTagNames().length;
+  renderSimulador();
+  iniciarSync();
+}
+
+// ── Renderear todos los widgets ───────────────────
+function renderearTodo() {
+  const canvas = document.getElementById('viewCanvas');
+  canvas.innerHTML = '';
+  widgets.forEach(w => crearWidgetEl(w));
+}
+
+function crearWidgetEl(w) {
+  const canvas = document.getElementById('viewCanvas');
+  const el = document.createElement('div');
+  el.id = w.id;
+
+  const INTERACTIVOS = ['button','toggle','checkbox','slider','numeric-input'];
+  const esInteractivo = INTERACTIVOS.includes(w.type) && w.props?.tag;
+
+  el.className = 'hmi-w' + (esInteractivo ? ' interactivo' : '');
+  el.style.cssText = `left:${w.x}px;top:${w.y}px;width:${w.w}px;height:${w.h}px;
+    transform:rotate(${w.rotation||0}deg)`;
+
+  const tv = TagManager.getValues();
+  const INTV = ['button','toggle','checkbox','slider','numeric-input'];
+  const esIntV = INTV.includes(w.type) && w.props?.tag;
+  const ptrSt  = esIntV ? 'pointer-events:auto;cursor:pointer;' : 'pointer-events:none;';
+  el.innerHTML = `<div class="w-content" style="width:100%;height:100%;${ptrSt}">${renderWidget(w, tv)}</div>` +
+    (w.label ? `<div class="wlabel">${w.label}</div>` : '');
+
+  canvas.appendChild(el);
+
+  // Habilitar interacción
+  if (esInteractivo) {
+    const content = el.querySelector('.w-content');
+    if (content) content.style.pointerEvents = 'auto';
+  }
+}
+
+// ── Renderear un widget ───────────────────────────
+function renderWidget(w, tv) {
+  if (!window.WL) return '';
+  try {
+    return WL.render(w, tv, true);
+  } catch(e) { return '<div style="color:red;font-size:10px">Error</div>'; }
+}
+
+// ── Actualizar un widget cuando cambia su tag ─────
+function onTagChanged(e) {
+  const { name, value } = e.detail;
+  widgets
+    .filter(w => w.props?.tag === name || w.tag === name)
+    .forEach(w => {
+      const el = document.getElementById(w.id);
+      if (!el) return;
+      const content = el.querySelector('.w-content');
+      if (content) {
+        const tv = TagManager.getValues();
+        content.innerHTML = renderWidget(w, tv);
+        // Mantener pointer-events:auto si es interactivo
+        const INT2 = ['button','toggle','checkbox','slider','numeric-input'];
+        const ptr  = INT2.includes(w.type) && w.props?.tag ? 'auto' : 'none';
+        content.style.pointerEvents = ptr;
+        if (ptr === 'auto') content.style.cursor = 'pointer';
+      }
+    });
+}
+
+// ── Suscribir widget a su tag ─────────────────────
+function bindWidgetATag(w) {
+  const tag = w.props?.tag || w.tag;
+  if (!tag) return;
+  // El event listener global 'tm:changed' ya maneja esto
+  // Pero forzamos un render inicial con el valor actual
+  const val = TagManager.getValue(tag);
+  if (val !== undefined) {
+    const el = document.getElementById(w.id);
+    if (el) {
+      const content = el.querySelector('.w-content');
+      if (content) content.innerHTML = renderWidget(w, TagManager.getValues());
+    }
+  }
+}
+
+// ── Comandos de widgets → TagManager + Backend ────
+window.__widgetCommand = async function(widgetId, action) {
+  const w = widgets.find(x => x.id === widgetId);
+  if (!w || !w.props?.tag) return;
+  const tag = w.props.tag;
+  let valor;
+
+  if (action === 'click') {
+    if (w.props.modo === 'toggle') {
+      valor = (TagManager.getValue(tag) || 0) > 0 ? 0 : 1;
+    } else {
+      // Momentáneo
+      TagManager.setValue(tag, w.props.valorOn ?? 1);
+      await enviarAlBackend(tag, w.props.valorOn ?? 1);
+      setTimeout(() => {
+        TagManager.setValue(tag, w.props.valorOff ?? 0);
+        enviarAlBackend(tag, w.props.valorOff ?? 0);
+      }, 350);
+      return;
+    }
+  } else if (action === 'toggle') {
+    valor = (TagManager.getValue(tag) || 0) > 0 ? 0 : 1;
+  } else if (action === 'plus') {
+    const step = parseFloat(w.props.step||1);
+    valor = Math.min(w.props.max??100, (TagManager.getValue(tag)||0) + step);
+  } else if (action === 'minus') {
+    const step = parseFloat(w.props.step||1);
+    valor = Math.max(w.props.min??0, (TagManager.getValue(tag)||0) - step);
+  } else {
+    valor = parseFloat(action);
+    if (isNaN(valor)) return;
+  }
+
+  TagManager.setValue(tag, valor);  // Actualiza todos los widgets suscritos
+  await enviarAlBackend(tag, valor); // Sincroniza con el hardware
+};
+
+// ── Enviar al backend (hardware real) ────────────
+const TAGS_P1 = { bomba_p1:'bomba_deseada', valvula_p1:'valvula_deseada' };
+const TAGS_P2 = { bomba_p2:'pwm_deseado',   valvula_p2:'valvula_deseada' };
+
+async function enviarAlBackend(tag, valor) {
+  if (TAGS_P1[tag]) {
+    const cmd = await api('/api/comando') || {};
+    const body = { bomba_deseada: cmd.bomba_deseada||false, valvula_deseada: cmd.valvula_deseada||false };
+    body[TAGS_P1[tag]] = valor > 0;
+    await api('/api/admin/comando', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+  } else if (TAGS_P2[tag]) {
+    const cmd = await api('/api/comando/planta2') || {};
+    const body = { valvula_deseada: cmd.valvula_deseada||false, pwm_deseado: cmd.pwm_deseado||0 };
+    if (tag === 'bomba_p2')   body.pwm_deseado      = valor > 0 ? 255 : 0;
+    if (tag === 'valvula_p2') body.valvula_deseada   = valor > 0;
+    await api('/api/admin/comando/planta2', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+  }
+}
+
+// ── Sincronización con backend cada 2s ───────────
+function iniciarSync() {
+  actualizarDesdeBackend();
+  setInterval(actualizarDesdeBackend, 2000);
+}
+
+async function actualizarDesdeBackend() {
+  const [p1, p2] = await Promise.all([
+    api('/api/lecturas/ultima'), api('/api/lecturas/planta2/ultima')
+  ]);
+
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusTxt');
+
+  if (p1 || p2) {
+    syncOK = true;
+    dot.className = 'status-dot';
+    txt.textContent = 'Sincronizado con servidor';
+    const obj = {};
+    if (p1) {
+      obj.nivel_p1 = p1.nivel; obj.caudal_p1 = p1.caudal;
+      obj.temp_ambiente = p1.temp_ambiente; obj.humedad = p1.humedad;
+      obj.temp_agua = p1.temp_agua;
+      obj.flotador_bajo = p1.flotador_bajo?1:0; obj.flotador_alto = p1.flotador_alto?1:0;
+      obj.bomba_p1 = p1.bomba_estado?1:0; obj.valvula_p1 = p1.valvula_estado?1:0;
+    }
+    if (p2) {
+      obj.nivel_p2 = p2.nivel; obj.caudal_p2 = p2.caudal;
+      obj.bomba_p2 = p2.bomba_estado?1:0; obj.valvula_p2 = p2.valvula_estado?1:0;
+    }
+    TagManager.updateFromBackend(obj); // Notifica a todos los widgets
+  } else {
+    dot.className = 'status-dot err';
+    txt.textContent = syncOK ? 'Sin conexión (última sync: hace poco)' : 'Servidor dormido...';
+  }
+}
+
+// ── Simulador ─────────────────────────────────────
+function toggleSim() {
+  simVisible = !simVisible;
+  document.getElementById('simPanel').classList.toggle('open', simVisible);
+  document.getElementById('btnSim').classList.toggle('active', simVisible);
+}
+
+function renderSimulador() {
+  const body = document.getElementById('simBody');
+  if (!body) return;
+  const tags = TagManager.getDefList().filter(t => t.activo !== false);
+  body.innerHTML = tags.map(t => {
+    const val = TagManager.getValue(t.nombre) ?? 0;
+    if (t.tipo === 'Boolean') {
+      return `<div class="sim-row">
+        <span class="sim-label" title="${t.descripcion||''}">${t.nombre}</span>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+          <input type="checkbox" ${val?'checked':''} style="width:14px;height:14px;accent-color:var(--accent)"
+                 onchange="TagManager.simulate('${t.nombre}',this.checked);renderSimulador()">
+          <span style="font-size:10px;color:var(--muted)">${val?'ON':'OFF'}</span>
+        </label>
+        <span style="font-size:9px;color:var(--muted)">${t.unidad||''}</span>
+      </div>`;
+    }
+    const min = t.min??0, max = t.max??100;
+    return `<div class="sim-row" style="grid-template-columns:1fr 2fr auto">
+      <span class="sim-label" title="${t.descripcion||''}">${t.nombre}</span>
+      <input type="range" min="${min}" max="${max}" step="${t.tipo==='Integer'?1:0.1}" value="${Number(val)||0}"
+             class="sim-input-range"
+             oninput="this.nextElementSibling.textContent=Number(this.value).toFixed(1)+' ${t.unidad||''}'"
+             onchange="TagManager.simulate('${t.nombre}',+this.value)">
+      <span style="font-family:monospace;font-size:10px;color:var(--accent);min-width:55px;text-align:right">
+        ${Number(val).toFixed?Number(val).toFixed(1):val} ${t.unidad||''}
+      </span>
+    </div>`;
+  }).join('');
+}
+
+// ── Reloj ─────────────────────────────────────────
+function tickClock() {
+  document.getElementById('viewClock').textContent =
+    new Date().toLocaleTimeString('es-EC');
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+// ── Init ──────────────────────────────────────────
+cargarPlanta();
+</script>
+</body>
+</html>

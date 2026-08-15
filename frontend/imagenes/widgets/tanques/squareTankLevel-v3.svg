@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <!-- Livello acqua con path -->
+  <path id="waterShape" fill="#3399ff" d="" stroke-width="1" />
+  <path id="waterShapeBorder" fill="none" stroke="#444444" stroke-width="4" stroke-linecap="round" d="" />
+  <rect id="tankBorder" x="7" y="7" width="136" height="136" stroke="#888888" stroke-width="4" fill="none" />
+
+  <!-- Static preview (used in <img>) -->
+  <path id="previewWater" fill="#74b1e6" d="M9 70 Q42 66, 75 70 Q108 74, 141 70 V141 H9 Z"/>
+
+  <text id="tankText" x="75" y="85" text-anchor="middle" font-size="24" fill="#000000" font-family="Arial">30%</text>
+
+  <script type="text/javascript">
+    <![CDATA[
+    let initValue = 30;
+    //!export-start
+    let _pc_borderColor = "#898989ff";
+    let _pc_waterColor = "#74b1e6ff";
+    let _pc_waterBorderColor = "#3781d8ff";
+    let _pc_textColor = "#000000ff";
+    let _pn_textSize = 24;
+    let _pn_value = initValue;
+    let _pn_min = 0;
+    let _pn_max = 100;
+    //!export-end
+
+    function init() {
+      const pw = document.getElementById('previewWater');
+      if (pw) pw.style.display = "none";
+
+      document.getElementById('tankBorder').style.stroke = _pc_borderColor;
+      document.getElementById('waterShape').style.fill = _pc_waterColor;
+      document.getElementById('tankText').style.fill = _pc_textColor;
+      document.getElementById('tankText').style.fontSize = _pn_textSize + 'px';
+      updateWaterLevel(_pn_value);
+    }
+
+    let animationFrame = null;
+
+    function updateWaterLevel(pct) {
+      const shape = document.getElementById('waterShape');
+      const shapeBorder = document.getElementById('waterShapeBorder');
+      pct = Math.max(_pn_min, Math.min(_pn_max, pct));
+      const relativePct = Math.round(((pct - _pn_min) / (_pn_max - _pn_min)) * 100);
+      const displayPct = Math.max(0, Math.min(100, relativePct));
+      document.getElementById('tankText').textContent = displayPct + '%';
+
+      const x = 9;
+      const y = 9;
+      const width = 132;
+      const height = 132;
+      const fillHeight = height * (pct - _pn_min) / (_pn_max - _pn_min);
+      const topY = y + height - fillHeight;
+
+      const waveCount = 4;
+      const waveAmp = 4;
+      const waveWidth = width / waveCount;
+
+      let wavePath = `M ${x} ${topY}`;
+      for (let i = 0; i < waveCount; i++) {
+        const xStart = x + i * waveWidth;
+        const xMid = xStart + waveWidth / 2;
+        const xEnd = xStart + waveWidth;
+        const yCtrl = topY + (i % 2 === 0 ? -waveAmp : waveAmp);
+        wavePath += ` Q ${xMid} ${yCtrl}, ${xEnd} ${topY}`;
+      }
+      wavePath += ` V ${y + height} H ${x} Z`;
+
+      let waveBorderPath = `M ${x} ${topY}`;
+      for (let i = 0; i < waveCount; i++) {
+        const xStart = x + i * waveWidth;
+        const xMid = xStart + waveWidth / 2;
+        const xEnd = xStart + waveWidth;
+        const yCtrl = topY + (i % 2 === 0 ? -waveAmp : waveAmp);
+        waveBorderPath += ` Q ${xMid} ${yCtrl}, ${xEnd} ${topY}`;
+      }
+      waveBorderPath += ` V ${y + height} H ${x} Z`;
+
+      shape.setAttribute('d', wavePath);
+      shapeBorder.setAttribute('d', waveBorderPath);
+
+      shape.setAttribute('fill', _pc_waterColor);
+      shape.setAttribute('stroke', _pc_waterColor);
+      shape.setAttribute('stroke-width', '1');
+      shapeBorder.setAttribute('stroke', _pc_waterBorderColor);
+      shapeBorder.setAttribute('stroke-width', '4');
+      shape.setAttribute('stroke-linecap', 'round');
+      shapeBorder.setAttribute('stroke-linecap', 'round');
+    }
+
+    let animationTimer = null;
+
+    function putValue(id, value) {
+      switch(id) {
+        case '_pc_borderColor': _pc_borderColor = value; init(); break;
+        case '_pc_waterColor': _pc_waterColor = value; init(); break;
+        case '_pc_textColor': _pc_textColor = value; init(); break;
+        case '_pn_textSize': _pn_textSize = parseInt(value); init(); break;
+        case '_pn_value':
+          let newValue = parseFloat(value);
+
+          if (isNaN(newValue)) return;
+
+          newValue = Math.max(_pn_min, Math.min(_pn_max, newValue));
+
+          if (animationTimer !== null) {
+            clearTimeout(animationTimer);
+            animationTimer = null;
+          }
+
+          const animateStep = () => {
+            const diff = newValue - _pn_value;
+
+            // Stop when close enough
+            if (Math.abs(diff) < 0.01) {
+              _pn_value = newValue;
+              updateWaterLevel(_pn_value);
+              animationTimer = null;
+              return;
+            }
+
+            // Dynamic smooth step
+            const step = diff * 0.2;
+
+            _pn_value += step;
+
+            updateWaterLevel(_pn_value);
+
+            animationTimer = setTimeout(animateStep, 30);
+          };
+
+          animateStep();
+          break;
+      }
+    }
+
+    setTimeout(() => {
+      init();
+    }, 100);
+    ]]>
+  </script>
+</svg>

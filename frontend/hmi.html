@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plataforma HMI — Acuicultura UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="assets/js/common.js"></script>
+<style>
+/* ── Pantalla vacía ─────────────── */
+.empty-state {
+  min-height: calc(100vh - 100px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  text-align: center;
+}
+.empty-icon { font-size: 72px; opacity: .25; }
+.empty-state h2 { margin:0;font-size:22px;font-weight:700;color:var(--text); }
+.empty-state p  { margin:0;color:var(--muted);max-width:420px;font-size:14px;line-height:1.6; }
+.btn-create-main {
+  padding: 16px 36px; border-radius: 12px; font-size: 16px; font-weight: 800;
+  background: var(--accent); border: none; color: #fff; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 10px; transition: .2s;
+  box-shadow: 0 8px 24px rgba(20,184,166,.35);
+}
+.btn-create-main:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(20,184,166,.45); }
+
+/* ── Grid de plantas ────────────── */
+.plantas-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 10px; flex-wrap: wrap; gap: 10px;
+}
+.plantas-header h2 { margin:0;font-size:18px;font-weight:700; }
+.plantas-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px; padding: 10px 20px 30px;
+}
+.planta-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px; transition: .2s;
+  box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.planta-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--accent), var(--blue));
+}
+.planta-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.planta-card .card-name { font-size:16px;font-weight:800;margin:0 0 6px; }
+.planta-card .card-desc { font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.5;min-height:36px; }
+.planta-card .card-meta { font-size:10px;color:var(--muted);margin-bottom:14px; }
+.planta-card .card-actions { display:flex;gap:8px;flex-wrap:wrap; }
+
+/* ── Modal crear planta ─────────── */
+.modal-create { max-width: 440px; }
+
+/* ── Desbloqueo de acceso temporal (Empleado) ───── */
+.btn-unlock {
+  background: linear-gradient(90deg, var(--accent), var(--blue));
+  border: none; color: #fff; font-weight: 700;
+  animation: pulseUnlock 1.6s ease-in-out infinite;
+}
+@keyframes pulseUnlock {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(20,184,166,.45); }
+  50%      { box-shadow: 0 0 0 8px rgba(20,184,166,0); }
+}
+.session-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:700; font-family:monospace;
+  color: var(--accent); background: rgba(20,184,166,.12);
+  border: 1px solid var(--accent); border-radius: 8px;
+  padding: 4px 8px; margin-bottom: 8px;
+}
+#tokDesbloqueoIn {
+  width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);
+  background:var(--panel2); color:var(--text); text-transform:uppercase;
+  letter-spacing:2px; text-align:center; font-family:monospace;
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="icon-btn hamburger" onclick="toggleNav()"><i class="fa-solid fa-bars"></i></button>
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" class="logo-img" alt="Logo">
+    <div class="logo-text">
+      <div class="nombre">ACUICULTURA DIGITAL</div>
+      <div class="sub">Transformación Digital · IA · UPSE</div>
+    </div>
+  </a>
+  <nav id="topNav">
+    <a href="hmi.html" class="activo"><i class="fa-solid fa-industry"></i> <span>Plantas</span></a>
+    <a href="historial.html"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
+    <a href="comentarios.html"><i class="fa-solid fa-comments"></i> Comentarios</a>
+    <a href="usuarios.html" id="navUsuarios" style="display:none"><i class="fa-solid fa-users"></i> Usuarios</a>
+  </nav>
+  <div class="topbar-clock" id="topbarClock">
+    <div class="tc-time">00:00:00</div><div class="tc-date">--</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="topbar-right">
+    <button class="icon-btn notif-btn" id="btnNotif" onclick="toggleNotif()">
+      <i class="fa-solid fa-bell"></i>
+      <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+    </button>
+    <div class="notif-panel" id="notifPanel">
+      <div class="notif-panel-header">
+        <h4><i class="fa-solid fa-bell" style="color:var(--accent)"></i> Notificaciones</h4>
+        <button class="btn sm" onclick="marcarTodasLeidas()"><i class="fa-solid fa-check-double"></i></button>
+      </div>
+      <div id="notifLista"><div class="notif-empty"><i class="fa-solid fa-bell-slash"></i><br>Sin notificaciones</div></div>
+    </div>
+    <div class="user-pill">
+      <span class="dot"></span>
+      <span id="userLabel">—</span>
+      <span class="role-badge" id="roleLabel">—</span>
+    </div>
+    <button class="icon-btn" onclick="abrirPanelConfig()" title="Configuración" style="color:var(--muted)">
+      <i class="fa-solid fa-gear"></i>
+    </button>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span class="logout-text">Cerrar sesión</span>
+    </button>
+  </div>
+</header>
+
+<!-- Contenido dinámico -->
+<div id="mainContent"></div>
+
+<!-- Modal crear planta -->
+<div class="modal-overlay" id="modalCrear" style="display:none" onclick="cerrarModalCrear(event)">
+  <div class="modal modal-create">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-plus-circle" style="color:var(--accent)"></i> Nueva Planta</h3>
+      <button class="btn-close" onclick="cerrarModalCrear()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="crearAlert"></div>
+      <div class="gap-6">
+        <div class="field">
+          <label><i class="fa-solid fa-industry"></i> Nombre de la planta</label>
+          <input type="text" id="nombrePlanta" placeholder="Ej: Planta de Nivel - Tanque Principal"
+                 autofocus>
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-align-left"></i> Descripción (opcional)</label>
+          <textarea id="descPlanta" rows="3"
+                    placeholder="Describe qué sensores y actuadores tiene esta planta..."></textarea>
+        </div>
+        <div class="alert info" style="display:flex">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Al crear la planta se abrirá su <strong>configuración</strong> (dispositivos, pines y variables).</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModalCrear()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      <button class="btn primary" id="btnCrearPlanta" onclick="crearPlanta()">
+        <i class="fa-solid fa-arrow-right"></i> Crear y configurar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmar eliminar -->
+<div class="modal-overlay" id="modalEliminar" style="display:none" onclick="document.getElementById('modalEliminar').style.display='none'">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i> Eliminar planta</h3>
+      <button class="btn-close" onclick="document.getElementById('modalEliminar').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0">¿Confirmas que quieres eliminar la planta <strong id="nombreEliminar"></strong>? Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="document.getElementById('modalEliminar').style.display='none'">Cancelar</button>
+      <button class="btn danger" id="btnConfEliminar">
+        <i class="fa-solid fa-trash"></i> Sí, eliminar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Desbloquear Acceso (Empleado) -->
+<div class="modal-overlay" id="modalDesbloqueo" style="display:none" onclick="if(event.target.id==='modalDesbloqueo')cerrarDesbloqueo()">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-key" style="color:var(--accent)"></i> Desbloquear Acceso</h3>
+      <button class="btn-close" onclick="cerrarDesbloqueo()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 10px;font-size:13px;color:var(--muted)">
+        Ingresa el token de acceso temporal que te otorgó tu Supervisor u Operador.
+        Solo necesitas hacerlo una vez: mientras la sesión esté activa podrás
+        navegar entre Configurar y Editar sin que se te vuelva a pedir.
+      </p>
+      <input id="tokDesbloqueoIn" type="text" placeholder="TOKEN DE ACCESO">
+      <div id="desbMsg" style="margin-top:8px;font-size:12px;color:var(--red)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarDesbloqueo()">Cancelar</button>
+      <button class="btn primary" onclick="confirmarDesbloqueo()"><i class="fa-solid fa-unlock"></i> Desbloquear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL_B = 'https://planta-backend-ifsy.onrender.com';
+
+// Forzar idioma: si no hay uno guardado o es una sesión nueva, usar español
+(function() {
+  const lang = localStorage.getItem('hmi_lang');
+  // Si el idioma guardado no es uno de los soportados conocidos, resetear a español
+  const VALIDOS = ['es','en','pt','fr','de','it','zh','ja'];
+  if (!lang || !VALIDOS.includes(lang)) {
+    localStorage.setItem('hmi_lang', 'es');
+  }
+})();
+const TK    = localStorage.getItem('hmi_token');
+let ROL   = localStorage.getItem('hmi_role');
+const USR   = localStorage.getItem('hmi_username');
+
+if (!TK) location.href = 'login.html';
+
+document.getElementById('userLabel').textContent = USR || '?';
+document.getElementById('roleLabel').textContent = ROL === 'admin_pro' ? 'Supervisor' : (ROL === 'admin' ? 'Operador' : 'Empleado');
+if (ROL === 'admin_pro') {
+  document.getElementById('roleLabel').classList.add('pro');
+}
+if (ROL === 'admin_pro' || ROL === 'admin') {
+  document.getElementById('navUsuarios').style.display = '';
+}
+
+async function sincronizarSesion(){
+  try{
+    const r=await fetch(URL_B+'/api/auth/me',{headers:{'Authorization':'Bearer '+TK}});
+    if(r.status===401){localStorage.clear();location.href='login.html';return false;}
+    if(r.ok){
+      const d=await r.json(); ROL=d.role;
+      localStorage.setItem('hmi_role',ROL); localStorage.setItem('hmi_username',d.username);
+      document.getElementById('userLabel').textContent=d.username||'?';
+      document.getElementById('roleLabel').textContent=ROL==='admin_pro'?'Supervisor':(ROL==='admin'?'Operador':'Empleado');
+      document.getElementById('roleLabel').classList.toggle('pro',ROL==='admin_pro');
+      document.getElementById('navUsuarios').style.display=(ROL==='admin_pro'||ROL==='admin')?'':'none';
+    }
+    return true;
+  }catch(e){return true;}
+}
+
+function toggleNav() { document.getElementById('topNav').classList.toggle('open'); }
+
+async function api(path, opts = {}) {
+  opts.headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + TK };
+  try {
+    const r = await fetch(URL_B + path, opts);
+    if (r.status === 401) {
+      localStorage.clear();  // Limpiar token expirado
+      location.href = 'login.html';
+      return null;
+    }
+    const ct = r.headers.get('Content-type') || '';
+    return ct.includes('json') ? r.json() : null;
+  } catch(e) {
+    console.error('[API Error]', path, e.message);
+    return null;  // Servidor dormido o sin red
+  }
+}
+
+// ── Notificaciones ──────────────────────────────────────────────
+let ultimoCount = 0, primeraPoll = true, notifVisible = false;
+
+function toggleNotif() {
+  notifVisible = !notifVisible;
+  document.getElementById('notifPanel').classList.toggle('open', notifVisible);
+  if (notifVisible) cargarNotificaciones();
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#btnNotif') && !e.target.closest('#notifPanel'))
+    document.getElementById('notifPanel').classList.remove('open');
+});
+
+async function cargarNotificaciones() {
+  const [lista, conteo] = await Promise.all([
+    api('/api/notificaciones'), api('/api/notificaciones/no-leidas')
+  ]);
+  if (!lista) return;
+  const n = conteo?.count || 0;
+  const badge = document.getElementById('notifBadge');
+  badge.textContent = n; badge.style.display = n > 0 ? '' : 'none';
+  document.getElementById('notifLista').innerHTML = lista.length === 0
+    ? '<div class="notif-empty"><i class="fa-solid fa-bell-slash"></i><br>Sin notificaciones</div>'
+    : lista.map(n2 => `<div class="notif-item ${n2.leida?'read-item':'unread'}" onclick="leerNotif(${n2.id})">
+        <div class="notif-ico"><i class="fa-solid fa-bell"></i></div>
+        <div><div class="notif-title">${n2.titulo}</div>
+        <div class="notif-msg">${n2.mensaje.slice(0,100)}</div>
+        <div class="notif-time">${new Date(n2.created_at).toLocaleString()}</div></div>
+      </div>`).join('');
+}
+async function leerNotif(id) {
+  await api('/api/notificaciones/'+id+'/leer', {method:'POST'});
+  cargarNotificaciones();
+}
+async function marcarTodasLeidas() {
+  await api('/api/notificaciones/leer-todas', {method:'POST'});
+  cargarNotificaciones();
+}
+async function actualizarBadge() {
+  const d = await api('/api/notificaciones/no-leidas'); if(!d) return;
+  if (!primeraPoll && d.count > ultimoCount) mostrarToast('🔔 Nueva notificación', d.count + ' sin leer');
+  primeraPoll = false; ultimoCount = d.count;
+  const badge = document.getElementById('notifBadge');
+  badge.textContent = d.count; badge.style.display = d.count > 0 ? '' : 'none';
+}
+
+// ── Plantas ─────────────────────────────────────────────────────
+async function cargarPlantas() {
+  // Mostrar pantalla de carga mientras conecta (Render puede tardar 30s al despertar)
+  document.getElementById('mainContent').innerHTML = `
+    <div class="empty-state">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:36px;color:var(--accent);opacity:.6"></i>
+      <p style="color:var(--muted);margin-top:12px;font-size:13px">Conectando al servidor...</p>
+      <p style="color:var(--muted);font-size:11px">Si es la primera conexión del día puede tardar hasta 30 segundos</p>
+    </div>`;
+
+  const plantas = await api('/api/plantas');
+
+  if (plantas === null) {
+    // Error de red o servidor dormido
+    document.getElementById('mainContent').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h2 style="color:var(--red)">No se pudo conectar</h2>
+        <p>El servidor no respondió. Puede estar iniciando (hasta 30 seg).</p>
+        <button class="btn-create-main" onclick="cargarPlantas()" style="margin-top:16px">
+          <i class="fa-solid fa-rotate"></i> Reintentar
+        </button>
+      </div>`;
+    return;
+  }
+
+  if (plantas.length === 0) {
+    renderEstadoVacio();
+  } else {
+    ULTIMAS_PLANTAS = plantas;
+    if (ROL === 'empleado') await cargarEstadoEmpleado(plantas);
+    renderListaPlantas(plantas);
+  }
+}
+
+// ── Sesión temporal del Empleado ──────────────────────────────────
+let ULTIMAS_PLANTAS = [];
+let EMP_PEND = [];        // permisos otorgados aún no activados (token sin usar)
+let EMP_ACTIVOS = {};     // plantId -> respuesta de /permisos-temp/activo
+let empPollInterval = null;
+let empCountdownInterval = null;
+
+async function cargarEstadoEmpleado(plantas) {
+  const pend = await api('/api/permisos-temp/pendiente');
+  EMP_PEND = (pend && pend.pendientes) || [];
+  const resultados = await Promise.all(
+    plantas.map(p => api('/api/permisos-temp/activo?plant_id=' + p.id))
+  );
+  EMP_ACTIVOS = {};
+  plantas.forEach((p, i) => { EMP_ACTIVOS[p.id] = resultados[i]; });
+}
+
+function pendienteDe(pid) {
+  return EMP_PEND.find(x => x.plant_id === pid || x.plant_id === null) || null;
+}
+
+function iniciarPollingEmpleado() {
+  if (ROL !== 'empleado') return;
+  if (empPollInterval) clearInterval(empPollInterval);
+  empPollInterval = setInterval(async () => {
+    if (!ULTIMAS_PLANTAS.length) return;
+    await cargarEstadoEmpleado(ULTIMAS_PLANTAS);
+    renderListaPlantas(ULTIMAS_PLANTAS);
+  }, 5000);
+
+  if (empCountdownInterval) clearInterval(empCountdownInterval);
+  empCountdownInterval = setInterval(() => {
+    let algunoExpiro = false;
+    document.querySelectorAll('.session-badge[data-expira]').forEach(el => {
+      const expira = utcDate(el.dataset.expira);
+      const ms = expira - Date.now();
+      if (ms <= 0) { algunoExpiro = true; return; }
+      const m = String(Math.floor(ms / 60000)).padStart(2, '0');
+      const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+      const txt = el.querySelector('.session-badge-time');
+      if (txt) txt.textContent = m + ':' + s;
+    });
+    if (algunoExpiro) {
+      // La sesión expiró: recargar estado para volver a modo solo lectura.
+      cargarEstadoEmpleado(ULTIMAS_PLANTAS).then(() => renderListaPlantas(ULTIMAS_PLANTAS));
+    }
+  }, 1000);
+}
+
+// ── Modal Desbloquear Acceso ───────────────────────────────────────
+let DESB_PID = null;
+function abrirDesbloqueo(pid) {
+  DESB_PID = pid;
+  document.getElementById('desbMsg').textContent = '';
+  document.getElementById('tokDesbloqueoIn').value = '';
+  document.getElementById('modalDesbloqueo').style.display = 'flex';
+  setTimeout(() => document.getElementById('tokDesbloqueoIn').focus(), 100);
+}
+function cerrarDesbloqueo() { document.getElementById('modalDesbloqueo').style.display = 'none'; }
+
+async function confirmarDesbloqueo() {
+  const tok = document.getElementById('tokDesbloqueoIn').value.trim();
+  if (!tok) { document.getElementById('desbMsg').textContent = 'Escribe el token de acceso.'; return; }
+  const r = await api('/api/permisos-temp/verificar?plant_id=' + encodeURIComponent(DESB_PID), {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: tok })
+  });
+  if (!r || !r.ok) {
+    document.getElementById('desbMsg').textContent = '❌ ' + ((r && r.detail) || 'Token inválido o expirado.');
+    return;
+  }
+  cerrarDesbloqueo();
+  mostrarToast('🔓 Acceso desbloqueado', 'Sesión temporal activa. Ya puedes usar Configurar/Editar.');
+  await cargarEstadoEmpleado(ULTIMAS_PLANTAS);
+  renderListaPlantas(ULTIMAS_PLANTAS);
+}
+
+function renderEstadoVacio() {
+  document.getElementById('mainContent').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">🏭</div>
+      <h2>No hay plantas creadas aún</h2>
+      <p>Crea tu primera planta para empezar a diseñar su interfaz HMI.<br>
+         Podrás agregar sensores, actuadores, gráficas y más.</p>
+      ${ROL === 'admin_pro'
+        ? '<button class="btn-create-main" onclick="abrirModalCrear()"><i class="fa-solid fa-plus"></i> Crear Planta</button>'
+        : '<div class="alert info" style="max-width:400px;display:flex"><i class="fa-solid fa-circle-info"></i><span>Contacta al Supervisor para crear una planta.</span></div>'
+      }
+    </div>`;
+}
+
+function renderListaPlantas(plantas) {
+  const esSupervisor = ROL === 'admin_pro';
+  // El Operador tiene control total (editar/configurar) sobre las plantas
+  // que tiene asignadas; solo el Supervisor puede eliminarlas.
+  const puedeControlar = ROL === 'admin_pro' || ROL === 'admin';
+  document.getElementById('mainContent').innerHTML = `
+    <div class="plantas-header">
+      <h2><i class="fa-solid fa-industry" style="color:var(--accent)"></i> Plantas Registradas</h2>
+      ${esSupervisor
+        ? '<button class="btn primary" onclick="abrirModalCrear()"><i class="fa-solid fa-plus"></i> Nueva Planta</button>'
+        : ''}
+    </div>
+    <div class="plantas-grid">
+      ${plantas.map(p => `
+        <div class="planta-card">
+          <div class="card-name">${p.nombre}</div>
+          <div class="card-desc">${p.descripcion || '<em style="color:var(--border2)">Sin descripción</em>'}</div>
+          <div class="card-meta">
+            <i class="fa-regular fa-clock"></i>
+            ${p.updated_at
+              ? 'Editada: ' + new Date(p.updated_at).toLocaleString()
+              : 'Creada: ' + new Date(p.created_at).toLocaleString()
+            }
+          </div>
+          ${accionesPlanta(p, esSupervisor, puedeControlar)}
+        </div>
+      `).join('')}
+    </div>`;
+  if (ROL === 'empleado') iniciarPollingEmpleado();
+}
+
+function accionesPlanta(p, esSupervisor, puedeControlar) {
+  const btnVer = `
+    <button class="btn primary sm" onclick="verPlanta(${p.id}, '${p.nombre.replace(/'/g,"\\'")}')"
+            style="${p.layout_json === '{}' ? 'opacity:.5' : ''}">
+      <i class="fa-solid fa-eye"></i> Ver Planta
+    </button>`;
+
+  if (puedeControlar) {
+    return `<div class="card-actions">${btnVer}
+      <button class="btn success sm" onclick="location.href='config-planta.html?planta=${p.id}'">
+        <i class="fa-solid fa-sliders"></i> Configurar
+      </button>
+      <button class="btn sm" onclick="location.href='editor.html?planta=${p.id}'">
+        <i class="fa-solid fa-pen-ruler"></i> Editar
+      </button>
+      ${esSupervisor ? `
+        <button class="btn danger sm" onclick="confirmarEliminar(${p.id}, '${p.nombre.replace(/'/g,"\\'")}')" style="margin-left:auto">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      ` : ''}
+    </div>`;
+  }
+
+  // ── Empleado: solo lectura salvo sesión temporal activa ──────
+  const activo = EMP_ACTIVOS[p.id];
+  const pend   = pendienteDe(p.id);
+
+  if (activo && activo.activo) {
+    const restMin = activo.minutos_restantes ?? 0;
+    return `
+      <div class="session-badge" data-expira="${activo.expires_at}">
+        <i class="fa-solid fa-hourglass-half"></i> Sesión activa · <span class="session-badge-time">${String(restMin).padStart(2,'0')}:00</span> restantes
+      </div>
+      <div class="card-actions">${btnVer}
+        ${activo.puede_configurar ? `
+          <button class="btn success sm" onclick="location.href='config-planta.html?planta=${p.id}'">
+            <i class="fa-solid fa-sliders"></i> Configurar
+          </button>` : ''}
+        ${activo.puede_editar ? `
+          <button class="btn sm" onclick="location.href='editor.html?planta=${p.id}'">
+            <i class="fa-solid fa-pen-ruler"></i> Editar
+          </button>` : ''}
+      </div>`;
+  }
+
+  if (pend) {
+    return `<div class="card-actions">${btnVer}
+      <button class="btn-unlock btn sm" onclick="abrirDesbloqueo(${p.id})">
+        <i class="fa-solid fa-unlock"></i> Desbloquear Acceso
+      </button>
+    </div>`;
+  }
+
+  return `<div class="card-actions">${btnVer}
+    <button class="btn sm" style="opacity:.5;cursor:not-allowed" title="Solo Supervisor u Operador pueden editar">
+      <i class="fa-solid fa-lock"></i> Solo lectura
+    </button>
+  </div>`;
+}
+
+// ── Crear planta ─────────────────────────────────────────────────
+function abrirModalCrear() {
+  document.getElementById('modalCrear').style.display = 'flex';
+  document.getElementById('nombrePlanta').value = '';
+  document.getElementById('descPlanta').value = '';
+  setTimeout(() => document.getElementById('nombrePlanta').focus(), 100);
+}
+function cerrarModalCrear(e) {
+  if (!e || e.target.id === 'modalCrear') document.getElementById('modalCrear').style.display = 'none';
+}
+async function crearPlanta() {
+  const btn = document.getElementById('btnCrearPlanta');
+  const nombre = document.getElementById('nombrePlanta').value.trim();
+  const desc   = document.getElementById('descPlanta').value.trim();
+  document.getElementById('crearAlert').innerHTML = '';
+  if (!nombre) {
+    document.getElementById('crearAlert').innerHTML =
+      '<div class="alert danger"><i class="fa-solid fa-triangle-exclamation"></i><span>El nombre es obligatorio</span></div>';
+    return;
+  }
+  // Bloqueo de doble clic: deshabilitar + spinner
+  if (btn) { btn.disabled = true; btn.dataset.html = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creando...'; }
+  const p = await api('/api/plantas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre, descripcion: desc })
+  });
+  if (p && p.id) {
+    cerrarModalCrear();
+    location.href = 'config-planta.html?planta=' + p.id;
+    return;
+  }
+  // Error (p. ej. nombre duplicado): mostrar y reactivar el botón
+  document.getElementById('crearAlert').innerHTML =
+    '<div class="alert danger"><i class="fa-solid fa-triangle-exclamation"></i><span>' +
+    ((p && p.detail) || 'No se pudo crear la planta.') + '</span></div>';
+  if (btn) { btn.disabled = false; btn.innerHTML = btn.dataset.html; }
+}
+
+// ── Eliminar planta ──────────────────────────────────────────────
+function confirmarEliminar(id, nombre) {
+  document.getElementById('nombreEliminar').textContent = nombre;
+  document.getElementById('btnConfEliminar').onclick = async () => {
+    await api('/api/plantas/' + id, { method: 'DELETE' });
+    document.getElementById('modalEliminar').style.display = 'none';
+    cargarPlantas();
+  };
+  document.getElementById('modalEliminar').style.display = 'flex';
+}
+
+// ── Ver planta (modal fullscreen con datos en vivo) ──────────────
+function verPlanta(id, nombre) {
+  // Por ahora redirige al editor en modo preview
+  location.href = 'view.html?planta=' + id;
+}
+
+// ── Sesión ───────────────────────────────────────────────────────
+async function cerrarSesion() {
+  await api('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  localStorage.clear(); location.href = 'login.html';
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+iniciarRelojTopbar();
+sincronizarSesion().then(ok=>{ if(ok) cargarPlantas(); });
+actualizarBadge();
+// Re-renderizar cuando cambie el idioma
+setInterval(actualizarBadge, 5000);
+
+document.getElementById('nombrePlanta').addEventListener?.('keyup', e => {
+  if (e.key === 'Enter') crearPlanta();
+});
+</script>
+</body>
+</html>

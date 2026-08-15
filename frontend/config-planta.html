@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configurar Planta — Acuicultura UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="assets/js/common.js"></script>
+<style>
+.cfg-wrap { padding: 16px 20px 40px; max-width: 1100px; margin: 0 auto; }
+.breadcrumb { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin-bottom:10px; }
+.breadcrumb a { color:var(--accent); text-decoration:none; }
+.cfg-title { font-size:20px; font-weight:800; margin:0 0 2px; display:flex; align-items:center; gap:10px; }
+.cfg-sub   { font-size:12px; color:var(--muted); margin:0 0 18px; }
+.cfg-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 14px; margin-bottom: 20px; overflow:hidden; box-shadow: var(--shadow-sm);
+}
+.cfg-card-head {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border); flex-wrap:wrap;
+}
+.cfg-card-head h3 { margin:0; font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.cfg-card-head h3 i { color:var(--accent); }
+.cfg-card-body { padding: 16px 18px; }
+.tabla-wrap { overflow-x:auto; }
+.mono { font-family: ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; }
+.empty-mini { text-align:center; color:var(--muted); padding: 26px 10px; font-size:13px; }
+.empty-mini i { font-size:28px; opacity:.3; display:block; margin-bottom:8px; }
+.pin-note { font-size:10px; color:var(--muted); }
+.token-box {
+  background: var(--bg2); border:1px dashed var(--accent); border-radius:10px;
+  padding:12px 14px; margin:10px 0; display:flex; align-items:center; gap:10px; justify-content:space-between;
+}
+.token-box code { font-size:12px; word-break:break-all; color:var(--text); }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:560px){ .grid2 { grid-template-columns:1fr; } }
+.hint { font-size:11px; color:var(--muted); margin-top:4px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="icon-btn hamburger" onclick="toggleNav()"><i class="fa-solid fa-bars"></i></button>
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" class="logo-img" alt="Logo">
+    <div class="logo-text">
+      <div class="nombre">ACUICULTURA DIGITAL</div>
+      <div class="sub">Transformación Digital · IA · UPSE</div>
+    </div>
+  </a>
+  <nav id="topNav">
+    <a href="hmi.html" class="activo"><i class="fa-solid fa-industry"></i> <span>Plantas</span></a>
+    <a href="historial.html"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
+    <a href="comentarios.html"><i class="fa-solid fa-comments"></i> Comentarios</a>
+    <a href="usuarios.html" id="navUsuarios" style="display:none"><i class="fa-solid fa-users"></i> Usuarios</a>
+  </nav>
+  <div class="topbar-clock" id="topbarClock"><div class="tc-time">00:00:00</div><div class="tc-date">--</div></div>
+  <div class="spacer"></div>
+  <div class="topbar-right">
+    <div class="user-pill"><span class="dot"></span><span id="userLabel">—</span><span class="role-badge" id="roleLabel">—</span></div>
+    <button class="icon-btn" onclick="abrirPanelConfig()" title="Configuración" style="color:var(--muted)"><i class="fa-solid fa-gear"></i></button>
+    <button class="btn-logout" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i><span class="logout-text">Cerrar sesión</span></button>
+  </div>
+</header>
+
+<div id="mainContent" class="cfg-wrap">
+  <div class="empty-mini"><i class="fa-solid fa-spinner fa-spin"></i>Cargando configuración...</div>
+</div>
+
+<!-- ── Modal: agregar dispositivo ────────────────────────────── -->
+<div class="modal-overlay" id="modalDevice" style="display:none" onclick="cerrarModal(event,'modalDevice')">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-microchip"></i> Nuevo dispositivo</h3>
+      <button class="btn-close" onclick="cerrarModal(null,'modalDevice')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="deviceAlert"></div>
+      <div class="gap-6">
+        <div class="field">
+          <label><i class="fa-solid fa-tag"></i> Nombre del dispositivo</label>
+          <input type="text" id="devNombre" placeholder="Ej: ESP32 del estanque 1">
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-microchip"></i> Microcontrolador</label>
+          <select id="devMcu"></select>
+          <div class="hint" id="devMcuHint"></div>
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-code-branch"></i> Versión de firmware (opcional)</label>
+          <input type="text" id="devFw" placeholder="Ej: 1.0.0">
+        </div>
+        <div class="alert info" style="display:flex">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Al crear el dispositivo se generará un <strong>token</strong> que se muestra <strong>una sola vez</strong>. Cópialo: es la credencial del hardware.</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal(null,'modalDevice')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      <button class="btn primary" id="btnGuardarDevice" onclick="guardarDevice()"><i class="fa-solid fa-plus"></i> Crear dispositivo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: token (una vez) ────────────────────────────────── -->
+<div class="modal-overlay" id="modalToken" style="display:none" onclick="cerrarModal(event,'modalToken')">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-key" style="color:var(--yellow)"></i> Token del dispositivo</h3>
+      <button class="btn-close" onclick="cerrarModal(null,'modalToken')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert warning" style="display:flex">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Guarda este token <strong>ahora</strong>. No se volverá a mostrar. Si lo pierdes, deberás regenerarlo (esto invalida el anterior).</span>
+      </div>
+      <div class="token-box">
+        <code id="tokenValor">—</code>
+        <button class="btn sm primary" onclick="copiarToken()"><i class="fa-solid fa-copy"></i> Copiar</button>
+      </div>
+      <div class="hint">Este token va en el firmware del dispositivo (cabecera <span class="mono">Authorization: Bearer &lt;token&gt;</span> o como credencial MQTT en fases posteriores).</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn primary" onclick="cerrarModal(null,'modalToken')"><i class="fa-solid fa-check"></i> Ya lo guardé</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Modal: ver clave del dispositivo (siempre) ────────────── -->
+<div class="modal-overlay" id="modalClave" style="display:none" onclick="cerrarModal(event,'modalClave')">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-key" style="color:var(--accent)"></i> Clave del dispositivo</h3>
+      <button class="btn-close" onclick="cerrarModal(null,'modalClave')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="hint" id="claveDevNombre" style="margin-bottom:8px"></div>
+      <div class="token-box">
+        <code id="claveValor" data-plain="">••••••••••••••••</code>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm" id="btnOjo" onclick="toggleClaveVisible()" title="Mostrar/ocultar"><i class="fa-solid fa-eye"></i></button>
+          <button class="btn sm primary" onclick="copiarClave()"><i class="fa-solid fa-copy"></i> Copiar</button>
+        </div>
+      </div>
+      <div class="hint">Credencial que va en el firmware del microcontrolador. Puedes verla y copiarla cuando la necesites. Si la regeneras, la anterior deja de funcionar.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal(null,'modalClave')">Cerrar</button>
+      <button class="btn warning" onclick="cerrarModal(null,'modalClave'); regenerarToken(_claveDid)"><i class="fa-solid fa-key"></i> Regenerar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: variable (crear/editar) ────────────────────────── -->
+<div class="modal-overlay" id="modalVar" style="display:none" onclick="cerrarModal(event,'modalVar')">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-sliders"></i> <span id="varModalTitulo">Nueva variable</span></h3>
+      <button class="btn-close" onclick="cerrarModal(null,'modalVar')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="varAlert"></div>
+      <input type="hidden" id="varId">
+      <div class="gap-6">
+        <div class="grid2">
+          <div class="field">
+            <label><i class="fa-solid fa-tag"></i> Nombre</label>
+            <input type="text" id="varNombre" placeholder="temp_agua">
+            <div class="hint">Letra inicial + letras/dígitos/_ (máx 50)</div>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-shapes"></i> Rol</label>
+            <select id="varRol" onchange="onRolChange()">
+              <option value="sensor">Sensor</option>
+              <option value="actuator">Actuador</option>
+              <option value="setpoint">Setpoint (consigna)</option>
+              <option value="indicator">Indicador</option>
+              <option value="calculated">Calculada</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label><i class="fa-solid fa-hashtag"></i> Tipo de dato</label>
+            <select id="varTipo">
+              <option value="float">Decimal (float)</option>
+              <option value="int">Entero (int)</option>
+              <option value="bool">Booleano (bool)</option>
+              <option value="string">Texto (string)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-right-left"></i> Dirección</label>
+            <select id="varDir">
+              <option value="">Automática (según rol)</option>
+              <option value="input">Entrada</option>
+              <option value="output">Salida</option>
+              <option value="virtual">Virtual</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label><i class="fa-solid fa-microchip"></i> Dispositivo</label>
+            <select id="varDevice" onchange="onVarDeviceChange()"></select>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-plug"></i> Pin</label>
+            <select id="varPin"><option value="">— (sin pin) —</option></select>
+            <div class="hint" id="varPinHint">Elige primero un dispositivo para ver sus pines.</div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label><i class="fa-solid fa-ruler"></i> Unidad (opcional)</label>
+            <input type="text" id="varUnidad" placeholder="°C, cm, L/min...">
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-arrows-left-right-to-line"></i> Rango (opcional)</label>
+            <div style="display:flex;gap:8px">
+              <input type="number" id="varMin" placeholder="mín" step="any">
+              <input type="number" id="varMax" placeholder="máx" step="any">
+            </div>
+          </div>
+        </div>
+        <div class="field" id="varFormulaWrap" style="display:none">
+          <label><i class="fa-solid fa-square-root-variable"></i> Fórmula (variables calculadas)</label>
+          <input type="text" id="varFormula" placeholder="Setpoint - temp_agua">
+          <div class="hint">Se guarda como texto (se evaluará de forma segura en fases posteriores; no se usa eval).</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal(null,'modalVar')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      <button class="btn primary" id="btnGuardarVar" onclick="guardarVariable()"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: confirmar eliminar (genérico) ──────────────────── -->
+<div class="modal-overlay" id="modalDel" style="display:none" onclick="cerrarModal(event,'modalDel')">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i> Confirmar</h3>
+      <button class="btn-close" onclick="cerrarModal(null,'modalDel')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body"><p style="margin:0" id="delMsg"></p></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal(null,'modalDel')">Cancelar</button>
+      <button class="btn danger" id="btnConfDel"><i class="fa-solid fa-trash"></i> Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL_B = localStorage.getItem('hmi_api') || 'https://planta-backend-ifsy.onrender.com';
+const TK  = localStorage.getItem('hmi_token');
+let ROL = localStorage.getItem('hmi_role');
+let CAN_CONFIG = ROL === 'admin_pro' || ROL === 'admin';
+const USR = localStorage.getItem('hmi_username');
+if (!TK) location.href = 'login.html';
+
+const PID = new URLSearchParams(location.search).get('planta');
+if (!PID) location.href = 'hmi.html';
+
+document.getElementById('userLabel').textContent = USR || '?';
+document.getElementById('roleLabel').textContent = ROL === 'admin_pro' ? 'Supervisor' : (ROL === 'admin' ? 'Operador' : 'Empleado');
+if (ROL === 'admin_pro') {
+  document.getElementById('roleLabel').classList.add('pro');
+}
+if (ROL === 'admin_pro' || ROL === 'admin') {
+  document.getElementById('navUsuarios').style.display = '';
+}
+
+async function sincronizarSesion(){
+  try{
+    const r=await fetch(URL_B+'/api/auth/me',{headers:{'Authorization':'Bearer '+TK}});
+    if(r.status===401){localStorage.clear();location.href='login.html';return false;}
+    if(r.ok){
+      const d=await r.json();
+      ROL=d.role;
+      localStorage.setItem('hmi_role',ROL);
+      localStorage.setItem('hmi_username',d.username);
+      document.getElementById('userLabel').textContent=d.username||'?';
+      document.getElementById('roleLabel').textContent=ROL==='admin_pro'?'Supervisor':(ROL==='admin'?'Operador':'Empleado');
+      document.getElementById('roleLabel').classList.toggle('pro',ROL==='admin_pro');
+      CAN_CONFIG=ROL==='admin_pro'||ROL==='admin';
+    }
+    if(ROL==='empleado'){
+      const perm=await api('/api/permisos-temp/activo?plant_id='+encodeURIComponent(PID));
+      CAN_CONFIG=!!(perm&&perm.activo&&perm.puede_configurar);
+    }
+    return true;
+  }catch(e){return true;}
+}
+
+function toggleNav() { document.getElementById('topNav').classList.toggle('open'); }
+function cerrarModal(e, id) { if (!e || e.target.id === id) document.getElementById(id).style.display = 'none'; }
+function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+
+// ── API helpers ─────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  opts.headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + TK };
+  try {
+    const r = await fetch(URL_B + path, opts);
+    if (r.status === 401) { localStorage.clear(); location.href = 'login.html'; return null; }
+    const ct = r.headers.get('Content-type') || '';
+    return ct.includes('json') ? r.json() : null;
+  } catch (e) { console.error('[API]', path, e.message); return null; }
+}
+// Versión que expone status + detalle (para validaciones 400)
+async function apiRaw(path, opts = {}) {
+  opts.headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + TK };
+  try {
+    const r = await fetch(URL_B + path, opts);
+    if (r.status === 401) { localStorage.clear(); location.href = 'login.html'; return { ok:false, status:401, data:null }; }
+    let data = null;
+    const ct = r.headers.get('Content-type') || '';
+    if (ct.includes('json')) data = await r.json();
+    return { ok: r.ok, status: r.status, data };
+  } catch (e) { return { ok:false, status:0, data:{ detail:'Sin conexión con el servidor' } }; }
+}
+function alertaEn(id, tipo, msg) {
+  document.getElementById(id).innerHTML =
+    `<div class="alert ${tipo}" style="display:flex"><i class="fa-solid fa-${tipo==='danger'?'triangle-exclamation':'circle-info'}"></i><span>${msg}</span></div>`;
+}
+
+// ── Estado ──────────────────────────────────────────────────────
+let PLANTA = null, MCUS = [], DEVICES = [], VARIABLES = [];
+const PINS_CACHE = {};
+
+const ROL_LABEL = { sensor:'Sensor', actuator:'Actuador', setpoint:'Setpoint', indicator:'Indicador', calculated:'Calculada' };
+const ROL_BADGE = { sensor:'blue', actuator:'yellow', setpoint:'cyan', indicator:'green', calculated:'gray' };
+const DIR_LABEL = { input:'Entrada', output:'Salida', virtual:'Virtual' };
+
+function mcuNombre(id) { const m = MCUS.find(x => x.id === id); return m ? m.name : ('MCU #' + id); }
+function mcuDe(deviceId) { const d = DEVICES.find(x => x.id === deviceId); return d ? d.mcu_id : null; }
+function deviceNombre(id) { const d = DEVICES.find(x => x.id === id); return d ? d.name : '—'; }
+function pinLabel(mcuId, pinId) {
+  const pins = PINS_CACHE[mcuId] || [];
+  const p = pins.find(x => x.id === pinId);
+  return p ? p.label : ('pin #' + pinId);
+}
+async function pinsDe(mcuId) {
+  if (!PINS_CACHE[mcuId]) PINS_CACHE[mcuId] = await api('/api/microcontrollers/' + mcuId + '/pines') || [];
+  return PINS_CACHE[mcuId];
+}
+
+// ── Carga ───────────────────────────────────────────────────────
+async function cargarTodo() {
+  PLANTA = await api('/api/plantas/' + PID);
+  if (PLANTA === null) {
+    document.getElementById('mainContent').innerHTML =
+      `<div class="empty-mini"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i>
+       No se pudo cargar la planta (¿servidor iniciando o sin permiso?).
+       <div style="margin-top:12px"><button class="btn primary" onclick="cargarTodo()"><i class="fa-solid fa-rotate"></i> Reintentar</button>
+       <a class="btn" href="hmi.html">Volver</a></div></div>`;
+    return;
+  }
+  MCUS = await api('/api/microcontrollers') || [];
+  DEVICES = await api('/api/plantas/' + PID + '/devices') || [];
+  VARIABLES = await api('/api/plantas/' + PID + '/variables') || [];
+  // Precargar pines de los MCU en uso (para etiquetas de la tabla)
+  await Promise.all([...new Set(DEVICES.map(d => d.mcu_id))].map(pinsDe));
+  render();
+}
+
+// ── Render principal ────────────────────────────────────────────
+function render() {
+  const esPro = CAN_CONFIG;
+  document.getElementById('mainContent').innerHTML = `
+    <div class="breadcrumb"><a href="hmi.html"><i class="fa-solid fa-arrow-left"></i> Plantas</a> <span>/</span> <span>Configurar</span></div>
+    <h1 class="cfg-title"><i class="fa-solid fa-sliders" style="color:var(--accent)"></i> ${PLANTA.nombre}</h1>
+    <p class="cfg-sub">${PLANTA.descripcion || 'Sin descripción'} · Configura el hardware: dispositivos (MCU) y variables (sensores/actuadores) ligadas a pines reales.</p>
+
+    ${!esPro ? '<div class="alert info" style="display:flex"><i class="fa-solid fa-lock"></i><span>No tienes permiso para modificar esta configuración.</span></div>' : ''}
+
+    <!-- DISPOSITIVOS -->
+    <div class="cfg-card">
+      <div class="cfg-card-head">
+        <h3><i class="fa-solid fa-microchip"></i> Dispositivos <span class="badge gray">${DEVICES.length}</span></h3>
+        ${esPro ? '<button class="btn primary sm" onclick="abrirModalDevice()"><i class="fa-solid fa-plus"></i> Agregar dispositivo</button>' : ''}
+      </div>
+      <div class="cfg-card-body">
+        ${DEVICES.length === 0
+          ? '<div class="empty-mini"><i class="fa-solid fa-microchip"></i>Aún no hay dispositivos. Agrega uno y elige su microcontrolador.</div>'
+          : `<div class="tabla-wrap"><table class="tabla">
+              <thead><tr><th>Nombre</th><th>MCU</th><th>UID</th><th>Estado</th><th>Firmware</th>${esPro?'<th></th>':''}</tr></thead>
+              <tbody>${DEVICES.map(d => `
+                <tr>
+                  <td><strong>${d.name}</strong></td>
+                  <td>${mcuNombre(d.mcu_id)}</td>
+                  <td><span class="mono">${d.device_uid}</span></td>
+                  <td><span class="badge ${d.status==='online'?'green':(d.status==='offline'?'red':'gray')}">${d.status}</span></td>
+                  <td>${d.firmware_version || '—'}</td>
+                  ${esPro ? `<td style="white-space:nowrap;text-align:right">
+                    <button class="btn sm" onclick="verClaveDispositivo(${d.id})" title="Ver clave (token)"><i class="fa-solid fa-eye"></i></button>
+                    <button class="btn sm warning" onclick="regenerarToken(${d.id})" title="Regenerar token"><i class="fa-solid fa-key"></i></button>
+                    <button class="btn sm danger" onclick="confirmarEliminarDevice(${d.id},'${(d.name||'').replace(/'/g,"\\'")}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                  </td>` : ''}
+                </tr>`).join('')}</tbody></table></div>`}
+      </div>
+    </div>
+
+    <!-- VARIABLES -->
+    <div class="cfg-card">
+      <div class="cfg-card-head">
+        <h3><i class="fa-solid fa-sliders"></i> Variables <span class="badge gray">${VARIABLES.length}</span></h3>
+        ${esPro ? `<button class="btn primary sm" onclick="abrirModalVariable()" ${DEVICES.length===0?'':''}><i class="fa-solid fa-plus"></i> Agregar variable</button>` : ''}
+      </div>
+      <div class="cfg-card-body">
+        ${VARIABLES.length === 0
+          ? '<div class="empty-mini"><i class="fa-solid fa-sliders"></i>Aún no hay variables. Crea sensores y actuadores y ligalos a un pin.</div>'
+          : `<div class="tabla-wrap"><table class="tabla">
+              <thead><tr><th>Nombre</th><th>Rol</th><th>Tipo</th><th>Dir.</th><th>Dispositivo</th><th>Pin</th><th>Unidad</th><th>Rango</th>${esPro?'<th></th>':''}</tr></thead>
+              <tbody>${VARIABLES.map(v => `
+                <tr>
+                  <td><strong>${v.name}</strong></td>
+                  <td><span class="badge ${ROL_BADGE[v.role]||'gray'}">${ROL_LABEL[v.role]||v.role}</span></td>
+                  <td class="mono">${v.data_type}</td>
+                  <td>${DIR_LABEL[v.direction]||v.direction}</td>
+                  <td>${v.device_id ? deviceNombre(v.device_id) : '—'}</td>
+                  <td>${(v.device_id && v.pin_id) ? '<span class="mono">'+pinLabel(mcuDe(v.device_id), v.pin_id)+'</span>' : '—'}</td>
+                  <td>${v.unit || '—'}</td>
+                  <td class="mono">${(v.min_val!=null||v.max_val!=null) ? ((v.min_val??'')+' … '+(v.max_val??'')) : '—'}</td>
+                  ${esPro ? `<td style="white-space:nowrap;text-align:right">
+                    <button class="btn sm" onclick="abrirModalVariable(${v.id})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn sm danger" onclick="confirmarEliminarVariable(${v.id},'${(v.name||'').replace(/'/g,"\\'")}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                  </td>` : ''}
+                </tr>`).join('')}</tbody></table></div>`}
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" onclick="location.href='hmi.html'"><i class="fa-solid fa-arrow-left"></i> Volver al menú / Dashboard</button>
+      ${esPro ? `<button class="btn primary" onclick="location.href='editor.html?planta=${PID}'">Continuar a editar HMI <i class="fa-solid fa-arrow-right"></i></button>` : ''}
+    </div>`;
+}
+
+// ── Dispositivos ────────────────────────────────────────────────
+function abrirModalDevice() {
+  document.getElementById('deviceAlert').innerHTML = '';
+  document.getElementById('devNombre').value = '';
+  document.getElementById('devFw').value = '';
+  const sel = document.getElementById('devMcu');
+  sel.innerHTML = MCUS.map(m => `<option value="${m.id}">${m.name}${m.has_wifi?' (WiFi)':''}</option>`).join('');
+  actualizarHintMcu();
+  sel.onchange = actualizarHintMcu;
+  abrirModal('modalDevice');
+  setTimeout(() => document.getElementById('devNombre').focus(), 100);
+}
+function actualizarHintMcu() {
+  const id = parseInt(document.getElementById('devMcu').value, 10);
+  const m = MCUS.find(x => x.id === id);
+  document.getElementById('devMcuHint').textContent = m ? ((m.vendor?m.vendor+' · ':'') + (m.num_gpio||0) + ' pines · ' + (m.notes||'')) : '';
+}
+async function guardarDevice() {
+  const name = document.getElementById('devNombre').value.trim();
+  const mcu_id = parseInt(document.getElementById('devMcu').value, 10);
+  const firmware_version = document.getElementById('devFw').value.trim() || null;
+  if (!name) { alertaEn('deviceAlert','danger','El nombre es obligatorio'); return; }
+  const btn = document.getElementById('btnGuardarDevice'); btn.disabled = true;
+  const r = await apiRaw('/api/plantas/' + PID + '/devices', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ mcu_id, name, firmware_version })
+  });
+  btn.disabled = false;
+  if (!r.ok) { alertaEn('deviceAlert','danger', (r.data && r.data.detail) || ('Error ' + r.status)); return; }
+  cerrarModal(null,'modalDevice');
+  mostrarToken(r.data);           // token en claro, una vez
+  await cargarTodo();
+}
+let _tokenActual = '';
+function mostrarToken(dev) {
+  _tokenActual = dev.token || '';
+  document.getElementById('tokenValor').textContent = _tokenActual;
+  abrirModal('modalToken');
+}
+function copiarToken() {
+  navigator.clipboard?.writeText(_tokenActual).then(
+    () => mostrarToast('Copiado', 'Token copiado al portapapeles', 'success'),
+    () => mostrarToast('Cópialo manualmente', 'Selecciona y copia el token', 'warning')
+  );
+}
+
+let _claveDid = null;
+async function verClaveDispositivo(did) {
+  _claveDid = did;
+  const dev = DEVICES.find(d => d.id === did);
+  document.getElementById('claveDevNombre').textContent = dev ? ('Dispositivo: ' + dev.name) : '';
+  const cv = document.getElementById('claveValor');
+  cv.dataset.plain = ''; cv.textContent = 'Cargando...';
+  document.getElementById('btnOjo').innerHTML = '<i class="fa-solid fa-eye"></i>';
+  abrirModal('modalClave');
+  const r = await apiRaw('/api/devices/' + did + '/token');
+  if (!r.ok) { cv.textContent = (r.data && r.data.detail) || 'No disponible'; return; }
+  cv.dataset.plain = r.data.token;
+  cv.textContent = '\u2022'.repeat(Math.min(24, r.data.token.length));   // oculto por defecto
+}
+function toggleClaveVisible() {
+  const cv = document.getElementById('claveValor');
+  const plain = cv.dataset.plain || '';
+  if (!plain) return;
+  const oculto = cv.textContent.indexOf('\u2022') === 0;
+  cv.textContent = oculto ? plain : '\u2022'.repeat(Math.min(24, plain.length));
+  document.getElementById('btnOjo').innerHTML = oculto ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+}
+function copiarClave() {
+  const plain = document.getElementById('claveValor').dataset.plain || '';
+  if (!plain) return;
+  navigator.clipboard?.writeText(plain).then(
+    () => mostrarToast('Copiado', 'Clave copiada al portapapeles', 'success'),
+    () => mostrarToast('Cópiala manualmente', 'Selecciona y copia la clave', 'warning')
+  );
+}
+
+async function regenerarToken(did) {
+  const r = await apiRaw('/api/devices/' + did + '/regenerar-token', { method:'POST' });
+  if (!r.ok) { mostrarToast('Error', (r.data && r.data.detail) || 'No se pudo regenerar', 'danger'); return; }
+  mostrarToken(r.data);
+  await cargarTodo();
+}
+function confirmarEliminarDevice(did, nombre) {
+  document.getElementById('delMsg').innerHTML = `¿Eliminar el dispositivo <strong>${nombre}</strong>? Sus variables quedarán sin dispositivo asignado.`;
+  document.getElementById('btnConfDel').onclick = async () => {
+    const r = await apiRaw('/api/devices/' + did, { method:'DELETE' });
+    cerrarModal(null,'modalDel');
+    if (!r.ok) { mostrarToast('Error', (r.data && r.data.detail) || 'No se pudo eliminar', 'danger'); return; }
+    await cargarTodo();
+  };
+  abrirModal('modalDel');
+}
+
+// ── Variables ───────────────────────────────────────────────────
+function onRolChange() {
+  const rol = document.getElementById('varRol').value;
+  document.getElementById('varFormulaWrap').style.display = (rol === 'calculated') ? '' : 'none';
+}
+function opcionesDevice(selectedId) {
+  const opts = ['<option value="">— (sin dispositivo) —</option>']
+    .concat(DEVICES.map(d => `<option value="${d.id}" ${d.id===selectedId?'selected':''}>${d.name} · ${mcuNombre(d.mcu_id)}</option>`));
+  return opts.join('');
+}
+async function abrirModalVariable(varId) {
+  document.getElementById('varAlert').innerHTML = '';
+  const editando = !!varId;
+  const v = editando ? VARIABLES.find(x => x.id === varId) : null;
+  document.getElementById('varModalTitulo').textContent = editando ? 'Editar variable' : 'Nueva variable';
+  document.getElementById('varId').value = editando ? varId : '';
+  document.getElementById('varNombre').value = v ? v.name : '';
+  document.getElementById('varRol').value    = v ? v.role : 'sensor';
+  document.getElementById('varTipo').value   = v ? v.data_type : 'float';
+  document.getElementById('varDir').value    = v ? '' : '';   // dejar Auto por defecto
+  document.getElementById('varUnidad').value = v ? (v.unit || '') : '';
+  document.getElementById('varMin').value    = v && v.min_val!=null ? v.min_val : '';
+  document.getElementById('varMax').value    = v && v.max_val!=null ? v.max_val : '';
+  document.getElementById('varFormula').value= v && v.formula ? v.formula : '';
+  document.getElementById('varDevice').innerHTML = opcionesDevice(v ? v.device_id : null);
+  onRolChange();
+  await onVarDeviceChange(v ? v.pin_id : null);
+  abrirModal('modalVar');
+  setTimeout(() => document.getElementById('varNombre').focus(), 100);
+}
+async function onVarDeviceChange(preselectPinId) {
+  const did = parseInt(document.getElementById('varDevice').value, 10);
+  const sel = document.getElementById('varPin');
+  const hint = document.getElementById('varPinHint');
+  if (!did) {
+    sel.innerHTML = '<option value="">— (sin pin) —</option>';
+    hint.textContent = 'Sin dispositivo: la variable no se liga a un pin físico (útil para calculadas/virtuales).';
+    return;
+  }
+  const dev = DEVICES.find(d => d.id === did);
+  const pins = await pinsDe(dev.mcu_id);
+  const editId = parseInt(document.getElementById('varId').value, 10) || null;
+  // pines ya usados por OTRAS variables de este dispositivo
+  const usados = new Set(VARIABLES.filter(x => x.device_id === did && x.pin_id && x.id !== editId).map(x => x.pin_id));
+  sel.innerHTML = '<option value="">— (sin pin) —</option>' + pins.map(p => {
+    const busy = usados.has(p.id);
+    const caps = (p.caps || []).join(', ');
+    const nota = p.note ? ' · ' + p.note : '';
+    const sel2 = (p.id === preselectPinId) ? 'selected' : '';
+    return `<option value="${p.id}" ${busy?'disabled':''} ${sel2}>${p.label}${nota} [${caps}]${busy?' — en uso':''}</option>`;
+  }).join('');
+  hint.textContent = `${mcuNombre(dev.mcu_id)} · ${pins.length} pines (los marcados "en uso" ya están asignados).`;
+}
+async function guardarVariable() {
+  const id = document.getElementById('varId').value;
+  const editando = !!id;
+  const body = {
+    name: document.getElementById('varNombre').value.trim(),
+    role: document.getElementById('varRol').value,
+    data_type: document.getElementById('varTipo').value,
+  };
+  const dir = document.getElementById('varDir').value;
+  if (dir) body.direction = dir;
+  const unidad = document.getElementById('varUnidad').value.trim();
+  if (unidad) body.unit = unidad;
+  const mn = document.getElementById('varMin').value, mx = document.getElementById('varMax').value;
+  if (mn !== '') body.min_val = parseFloat(mn);
+  if (mx !== '') body.max_val = parseFloat(mx);
+  const did = parseInt(document.getElementById('varDevice').value, 10);
+  if (did) body.device_id = did;
+  const pid2 = parseInt(document.getElementById('varPin').value, 10);
+  if (pid2) body.pin_id = pid2;
+  const formula = document.getElementById('varFormula').value.trim();
+  if (formula) body.formula = formula;
+
+  if (!body.name) { alertaEn('varAlert','danger','El nombre es obligatorio'); return; }
+
+  const btn = document.getElementById('btnGuardarVar'); btn.disabled = true;
+  let r;
+  if (editando) {
+    r = await apiRaw('/api/variables/' + id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  } else {
+    r = await apiRaw('/api/plantas/' + PID + '/variables', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  }
+  btn.disabled = false;
+  if (!r.ok) { alertaEn('varAlert','danger', (r.data && r.data.detail) || ('Error ' + r.status)); return; }
+  cerrarModal(null,'modalVar');
+  mostrarToast(editando ? 'Variable actualizada' : 'Variable creada', body.name, 'success');
+  await cargarTodo();
+}
+function confirmarEliminarVariable(vid, nombre) {
+  document.getElementById('delMsg').innerHTML = `¿Eliminar la variable <strong>${nombre}</strong>? También se borrará su histórico.`;
+  document.getElementById('btnConfDel').onclick = async () => {
+    const r = await apiRaw('/api/variables/' + vid, { method:'DELETE' });
+    cerrarModal(null,'modalDel');
+    if (!r.ok) { mostrarToast('Error', (r.data && r.data.detail) || 'No se pudo eliminar', 'danger'); return; }
+    await cargarTodo();
+  };
+  abrirModal('modalDel');
+}
+
+// ── Sesión ──────────────────────────────────────────────────────
+async function cerrarSesion() {
+  await api('/api/auth/logout', { method:'POST' }).catch(() => {});
+  localStorage.clear(); location.href = 'login.html';
+}
+
+// ── Init ────────────────────────────────────────────────────────
+iniciarRelojTopbar();
+sincronizarSesion().then(ok=>{ if(ok) cargarTodo(); });
+</script>
+</body>
+</html>

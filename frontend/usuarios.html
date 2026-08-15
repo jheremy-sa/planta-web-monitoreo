@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Usuarios — HMI Acuicultura UPSE</title>
+<link rel="stylesheet" href="assets/css/tema.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="assets/js/common.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="logo" href="hmi.html">
+    <img src="imagenes/acuicultura.png" class="logo-img" alt="Acuicultura">
+    <div class="logo-text"><div class="nombre">ACUICULTURA DIGITAL</div>
+    <div class="sub">Transformación Digital · Acuicultura UPSE</div></div>
+  </a>
+  <nav>
+    <a href="hmi.html"><i class="fa-solid fa-gauge-high"></i> Planta</a>
+    <a href="historial.html"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
+    <a href="comentarios.html"><i class="fa-solid fa-comments"></i> Comentarios</a>
+    <a href="usuarios.html" class="activo"><i class="fa-solid fa-users"></i> Usuarios</a>
+  </nav>
+  <!-- Reloj -->
+  <div class="topbar-clock" id="topbarClock">
+    <div class="tc-time">00:00:00</div>
+    <div class="tc-date">--</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="spacer"></div>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <span class="dot"></span>
+      <span id="userLabel">—</span>
+      <span class="role-badge" id="roleLabel">—</span>
+    </div>
+    <button class="icon-btn" onclick="abrirPanelConfig()" title="Configuración" style="color:#c5d0da">
+      <i class="fa-solid fa-gear"></i>
+    </button>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span class="logout-text">Cerrar sesión</span>
+    </button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="flex between mb-2">
+    <h2 style="margin:0;display:flex;align-items:center;gap:10px">
+      <i class="fa-solid fa-users" style="color:var(--accent)"></i> <span>Gestión de Usuarios</span>
+    </h2>
+    <button class="btn primary" onclick="abrirCrear()">
+      <i class="fa-solid fa-user-plus"></i> Nuevo usuario
+    </button>
+  </div>
+  <div id="alertTop"></div>
+  <div class="card">
+    <div id="listaUsers"><div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+  </div>
+</div>
+
+<!-- Modal crear -->
+<div class="modal-overlay" id="modalCrear" style="display:none" onclick="cerrarCrear(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-user-plus"></i> Nuevo Usuario</h3>
+      <button class="btn-close" onclick="cerrarCrear()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="crearAlert"></div>
+      <div class="gap-6">
+        <div class="field"><label><i class="fa-solid fa-envelope"></i> Correo</label>
+          <input type="email" id="nEmail" placeholder="usuario@planta.local"></div>
+        <div class="field"><label><i class="fa-solid fa-user"></i> Nombre de usuario</label>
+          <input type="text" id="nUser" placeholder="Operador1"></div>
+        <div class="field"><label><i class="fa-solid fa-lock"></i> Contraseña inicial</label>
+          <input type="password" id="nPwd" placeholder="Mínimo 8 caracteres"></div>
+        <div class="field"><label><i class="fa-solid fa-shield-halved"></i> Rol</label>
+          <select id="nRol">
+            <option value="admin">Operador (opera plantas asignadas)</option>
+            <option value="empleado">Empleado (solo lectura de plantas asignadas)</option>
+            <option value="admin_pro">Supervisor (control total)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarCrear()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      <button class="btn primary" onclick="crearUsuario()">
+        <i class="fa-solid fa-floppy-disk"></i> Crear usuario
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal asignar plantas -->
+<div class="modal-overlay" id="modalPlantas" style="display:none" onclick="if(event.target.id==='modalPlantas')cerrarPlantas()">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-industry"></i> Plantas asignadas</h3>
+      <button class="btn-close" onclick="cerrarPlantas()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="plantasAlert"></div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px" id="plantasSub">—</p>
+      <div id="plantasBody" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto"></div>
+      <div id="permisoInfo" style="display:none;margin-top:12px;padding:9px 11px;border-radius:8px;background:rgba(0,180,255,.08);border:1px solid var(--border);font-size:12px;color:var(--muted)">
+        <i class="fa-solid fa-pen-to-square" style="color:var(--accent);margin-right:5px"></i>
+        <strong>Operador:</strong> las plantas asignadas permiten operar y editar el HMI.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarPlantas()">Cancelar</button>
+      <button class="btn primary" onclick="guardarPlantas()"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal permiso temporal -->
+<div class="modal-overlay" id="modalPermiso" style="display:none" onclick="if(event.target.id==='modalPermiso')cerrarPermiso()">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-key"></i> Permiso temporal</h3>
+      <button class="btn-close" onclick="cerrarPermiso()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="permisoAlert"></div>
+      <p id="permisoSub" style="font-size:12px;color:var(--muted);margin:0 0 12px">—</p>
+      <div class="gap-6">
+        <div class="field"><label><i class="fa-solid fa-industry"></i> Planta</label>
+          <select id="permPlant"></select></div>
+        <div class="field"><label><i class="fa-solid fa-hourglass-half"></i> Duración (minutos)</label>
+          <input type="number" id="permDur" min="1" max="10080" value="60"></div>
+        <div class="field">
+          <label><i class="fa-solid fa-list-check"></i> Acciones permitidas</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <label><input type="checkbox" id="permEditar"> Editar HMI</label>
+            <label><input type="checkbox" id="permConfig"> Configurar variables</label>
+            <label><input type="checkbox" id="permOperar"> Operar</label>
+            <label><input type="checkbox" id="permDevices"> Configurar dispositivos</label>
+          </div>
+        </div>
+      </div>
+      <div id="tokenGenerado" style="display:none;margin-top:14px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarPermiso()">Cancelar</button>
+      <button class="btn primary" id="btnConceder" onclick="concederPermiso()"><i class="fa-solid fa-key"></i> Conceder permiso</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL='https://planta-backend-ifsy.onrender.com';
+const TK=localStorage.getItem('hmi_token');
+let ROL=localStorage.getItem('hmi_role');
+let YO=localStorage.getItem('hmi_username');
+if(!TK){location.href='login.html';}
+
+function rolLabel(r){ return r==='admin_pro'?'Supervisor':(r==='empleado'?'Empleado':'Operador'); }
+function rolBadge(r){ return r==='admin_pro'?'cyan':(r==='empleado'?'gray':'blue'); }
+function rolIcon(r){ return r==='admin_pro'?'fa-crown':(r==='empleado'?'fa-eye':'fa-user'); }
+
+function aplicarRolSesion(){
+  const el=document.getElementById('roleLabel');
+  if(el){ el.textContent=rolLabel(ROL); el.className='role-badge '+(ROL==='admin_pro'?'pro':''); }
+  const sel=document.getElementById('nRol');
+  if(sel){
+    const opPro=sel.querySelector('option[value="admin_pro"]');
+    if(opPro) opPro.style.display=ROL==='admin_pro'?'':'none';
+    if(ROL==='admin') sel.value='empleado';
+  }
+}
+
+async function sincronizarSesion(){
+  try{
+    const r=await fetch(URL+'/api/auth/me',{headers:{'Authorization':'Bearer '+TK}});
+    if(r.status===401){localStorage.clear();location.href='login.html';return false;}
+    if(r.ok){
+      const d=await r.json();
+      ROL=d.role; YO=d.username;
+      localStorage.setItem('hmi_role',ROL);
+      localStorage.setItem('hmi_username',YO);
+    }
+  }catch(e){ console.warn('[SESION] No se pudo sincronizar:',e.message); }
+  if(!['admin_pro','admin'].includes(ROL)){location.href='hmi.html';return false;}
+  aplicarRolSesion();
+  return true;
+}
+
+async function api(path,opts={}) {
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),20000);
+  opts.signal=controller.signal;
+  opts.headers={...(opts.headers||{}),'Authorization':'Bearer '+TK,'Content-Type':'application/json'};
+  try{
+    const r=await fetch(URL+path,opts);
+    if(r.status===401){localStorage.clear();location.href='login.html';return null;}
+    let data=null; const ct=r.headers.get('Content-type')||'';
+    if(ct.includes('json')) data=await r.json();
+    return {ok:r.ok,status:r.status,data};
+  }catch(e){
+    return {ok:false,status:0,data:{detail:e.name==='AbortError'?'El servidor tardó demasiado en responder.':'No se pudo conectar con el servidor.'}};
+  }finally{clearTimeout(timer);}
+}
+function alerta(id,msg,tipo='danger') {
+  document.getElementById(id).innerHTML=msg
+    ?`<div class="alert ${tipo}"><i class="fa-solid ${tipo==='success'?'fa-circle-check':'fa-triangle-exclamation'}"></i><span>${msg}</span></div>`
+    :'';
+}
+
+async function cargarUsuarios() {
+  const box=document.getElementById('listaUsers');
+  box.innerHTML='<div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i> Cargando usuarios...</div>';
+  const r=await api('/api/usuarios');
+  if(!r||!r.ok){
+    box.innerHTML=`<div class="no-data" style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation"></i> ${(r&&r.data&&r.data.detail)||'No se pudieron cargar los usuarios.'}<div style="margin-top:10px"><button class="btn sm" onclick="cargarUsuarios()"><i class="fa-solid fa-rotate"></i> Reintentar</button></div></div>`;
+    return;
+  }
+  const lista=Array.isArray(r.data)?r.data:[]; window._USERS=lista;
+  box.innerHTML=`
+    <table class="tabla">
+      <thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último login</th><th>Acciones</th></tr></thead>
+      <tbody>${lista.map(u=>{
+        const esYo=(u.username===YO);
+        const puedeGestionar=!esYo && (ROL==='admin_pro' ? u.role!=='admin_pro' : u.role==='empleado');
+        return `
+        <tr>
+          <td style="font-weight:700"><i class="fa-solid fa-user" style="color:var(--muted);margin-right:6px"></i>${u.username}${esYo?' <span class="badge cyan" style="margin-left:4px">Tú</span>':''}</td>
+          <td style="font-size:12px;color:var(--muted)">${u.email}</td>
+          <td><span class="badge ${rolBadge(u.role)}"><i class="fa-solid ${rolIcon(u.role)}"></i> ${rolLabel(u.role)}</span></td>
+          <td><span class="badge ${u.is_active?'green':'red'}"><i class="fa-solid ${u.is_active?'fa-circle-check':'fa-circle-xmark'}"></i> ${u.is_active?'Activo':'Suspendido'}</span></td>
+          <td style="font-size:11px;color:var(--muted)">${u.last_login?'<i class="fa-regular fa-clock"></i> '+new Date(u.last_login).toLocaleString():'Nunca'}</td>
+          <td><div class="flex wrap" style="gap:6px">
+              ${puedeGestionar&&u.role==='empleado'?`<button class="btn sm primary" onclick="abrirPermiso('${u.email}','${u.username}')"><i class="fa-solid fa-key"></i> Permiso temporal</button>`:''}
+              ${puedeGestionar?`<button class="btn sm" onclick="abrirPlantas(${u.id})"><i class="fa-solid fa-industry"></i> Plantas</button>`:''}
+              ${puedeGestionar?`<button class="btn sm" onclick="resetPwd(${u.id},'${u.username}')"><i class="fa-solid fa-key"></i> Reset pwd</button>`:''}
+              ${esYo?'<button class="btn sm" disabled><i class="fa-solid fa-shield-halved"></i> Tu cuenta</button>':''}
+              ${puedeGestionar?`<button class="btn sm ${u.is_active?'danger':'success'}" onclick="toggleActivo(${u.id},${!u.is_active})"><i class="fa-solid ${u.is_active?'fa-ban':'fa-circle-check'}"></i> ${u.is_active?'Suspender':'Activar'}</button>`:''}
+              ${puedeGestionar?`<select class="btn sm" onchange="cambiarRol(${u.id},this.value)"><option value="">Cambiar rol</option><option value="admin">→ Operador</option><option value="empleado">→ Empleado</option></select>`:''}
+            </div></td>
+        </tr>`;}).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function resetPwd(uid,nombre) {
+  if(!confirm(`¿Resetear contraseña de ${nombre}?`)) return;
+  const r=await api(`/api/usuarios/${uid}/reset-password`,{method:'POST'});
+  if(r&&r.ok) alerta('alertTop',
+    `Contraseña temporal de ${nombre}: <strong style="font-family:monospace;font-size:15px;letter-spacing:2px">${r.data.temp_password}</strong> — Válida 24 h. El usuario la recibirá en sus notificaciones.`,
+    'success');
+  else if(r) alerta('alertTop',(r.data&&r.data.detail)||'No se pudo resetear.');
+}
+async function toggleActivo(uid,activo) {
+  const r=await api(`/api/usuarios/${uid}`,{method:'PUT',body:JSON.stringify({is_active:activo})});
+  if(r&&!r.ok){ alerta('alertTop',(r.data&&r.data.detail)||'No se pudo actualizar.'); return; }
+  cargarUsuarios();
+}
+async function cambiarRol(uid,rol) {
+  if(!rol) return;
+  const r=await api(`/api/usuarios/${uid}`,{method:'PUT',body:JSON.stringify({role:rol})});
+  if(r&&!r.ok){ alerta('alertTop',(r.data&&r.data.detail)||'No se pudo cambiar el rol.'); cargarUsuarios(); return; }
+  alerta('alertTop','Rol actualizado correctamente.','success');
+  cargarUsuarios();
+}
+function abrirCrear(){document.getElementById('modalCrear').style.display='flex';}
+function cerrarCrear(e){if(!e||e.target.id==='modalCrear')document.getElementById('modalCrear').style.display='none';}
+async function crearUsuario() {
+  const email=document.getElementById('nEmail').value.trim();
+  const user=document.getElementById('nUser').value.trim();
+  const pwd=document.getElementById('nPwd').value;
+  const rol=document.getElementById('nRol').value;
+  if(!email||!user||!pwd){alerta('crearAlert','Completa todos los campos.');return;}
+  if(pwd.length<8){alerta('crearAlert','Mínimo 8 caracteres en la contraseña.');return;}
+  const r=await api('/api/usuarios',{method:'POST',body:JSON.stringify({email,username:user,password:pwd,role:rol})});
+  if(r&&r.ok){
+    alerta('crearAlert','Usuario creado correctamente. Ya puede iniciar sesión.','success');
+    setTimeout(()=>{cerrarCrear();cargarUsuarios();},1000);
+  } else if(r) alerta('crearAlert',(r.data&&r.data.detail)||'Error al crear usuario.');
+}
+async function cerrarSesion() {
+  await fetch(URL+'/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+TK}}).catch(()=>{});
+  localStorage.clear();location.href='login.html';
+}
+let _asigUid=null;
+
+async function abrirPlantas(uid){
+  _asigUid=uid;
+  const u=(window._USERS||[]).find(x=>x.id===uid);
+  document.getElementById('plantasAlert').innerHTML='';
+  document.getElementById('plantasSub').textContent=(u?`${u.username} · ${rolLabel(u.role)}`:'')+' — marca las plantas que podrá ver';
+  const info=document.getElementById('permisoInfo');
+  info.style.display=(u && u.role==='admin')?'block':'none';
+  const body=document.getElementById('plantasBody');
+  body.innerHTML='<div class="no-data"><i class="fa-solid fa-spinner fa-spin"></i></div>';
+  document.getElementById('modalPlantas').style.display='flex';
+  const [plR,asR]=await Promise.all([api('/api/plantas'), api(`/api/usuarios/${uid}/plantas`)]);
+  const plantas=(plR&&plR.ok)?plR.data:[];
+  const asignadas=new Set((asR&&asR.ok)?asR.data.plant_ids:[]);
+  if(!plantas.length){ body.innerHTML='<div class="no-data">No tienes plantas para asignar.</div>'; return; }
+  body.innerHTML=plantas.map(p=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer">
+      <input type="checkbox" class="pl-chk" value="${p.id}" ${asignadas.has(p.id)?'checked':''} style="width:16px;height:16px;accent-color:var(--accent)">
+      <span style="font-weight:600">${p.nombre}</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:auto">${p.descripcion||''}</span>
+    </label>`).join('');
+}
+function cerrarPlantas(){ document.getElementById('modalPlantas').style.display='none'; }
+async function guardarPlantas(){
+  const ids=[...document.querySelectorAll('.pl-chk:checked')].map(c=>parseInt(c.value,10));
+  // El backend determina el permiso según el rol:
+  // Operador asignado = puede editar/operar; Empleado = solo lectura.
+  const r=await api(`/api/usuarios/${_asigUid}/plantas`,{method:'PUT',body:JSON.stringify({plant_ids:ids})});
+  if(r&&r.ok){ alerta('alertTop','Plantas asignadas correctamente.','success'); cerrarPlantas(); }
+  else if(r) alerta('plantasAlert',(r.data&&r.data.detail)||'No se pudo guardar.');
+}
+let _permEmail=null;
+function abrirPermiso(email,nombre){
+  _permEmail=email;
+  document.getElementById('permisoSub').textContent=`Empleado: ${nombre} · ${email}`;
+  document.getElementById('permisoAlert').innerHTML='';
+  document.getElementById('tokenGenerado').style.display='none';
+  document.getElementById('permPlant').innerHTML='<option value="">Cargando plantas...</option>';
+  document.getElementById('permEditar').checked=true;
+  document.getElementById('permConfig').checked=false;
+  document.getElementById('permOperar').checked=true;
+  document.getElementById('permDevices').checked=false;
+  document.getElementById('modalPermiso').style.display='flex';
+  cargarPlantasPermiso();
+}
+function cerrarPermiso(){document.getElementById('modalPermiso').style.display='none';_permEmail=null;}
+async function cargarPlantasPermiso(){
+  const r=await api('/api/plantas');
+  const sel=document.getElementById('permPlant');
+  if(!r||!r.ok||!Array.isArray(r.data)||!r.data.length){
+    sel.innerHTML='<option value="">No hay plantas disponibles</option>'; return;
+  }
+  sel.innerHTML=r.data.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+}
+async function concederPermiso(){
+  const plantId=document.getElementById('permPlant').value;
+  const dur=parseInt(document.getElementById('permDur').value,10);
+  const acciones={
+    puede_editar:document.getElementById('permEditar').checked,
+    puede_configurar:document.getElementById('permConfig').checked,
+    puede_operar:document.getElementById('permOperar').checked,
+    puede_dispositivos:document.getElementById('permDevices').checked
+  };
+  if(!plantId){alerta('permisoAlert','Selecciona una planta.');return;}
+  if(!dur||dur<1||dur>10080){alerta('permisoAlert','La duración debe estar entre 1 y 10080 minutos.');return;}
+  if(!Object.values(acciones).some(Boolean)){alerta('permisoAlert','Selecciona al menos una acción.');return;}
+  const btn=document.getElementById('btnConceder');
+  btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Generando...';
+  const r=await api('/api/permisos-temp',{method:'POST',body:JSON.stringify({
+    para_usuario:_permEmail,plant_id:parseInt(plantId,10),duracion_min:dur,...acciones
+  })});
+  btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-key"></i> Conceder permiso';
+  if(!r||!r.ok){alerta('permisoAlert',(r&&r.data&&r.data.detail)||'No se pudo generar el permiso.');return;}
+  document.getElementById('permisoAlert').innerHTML='';
+  const d=r.data;
+  const exp=formatLocal(d.expires_at);
+  const box=document.getElementById('tokenGenerado');
+  box.style.display='';
+  box.innerHTML=`<div class="alert success" style="font-family:monospace;word-break:break-all"><i class="fa-solid fa-circle-check"></i><div><strong>Permiso concedido correctamente.</strong><br><span style="font-family:inherit">Token:</span> <code style="font-size:15px;letter-spacing:2px">${d.token}</code><br><small style="font-family:inherit;color:var(--muted)">Expira: ${exp}</small></div></div>`;
+  cargarUsuarios();
+}
+
+async function inicializar(){
+  if(await sincronizarSesion()) cargarUsuarios();
+}
+inicializar();
+iniciarRelojTopbar();
+</script>
+</body>
+</html>

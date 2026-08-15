@@ -554,7 +554,7 @@ async function abrirModalVariable(varId) {
   document.getElementById('varNombre').value = v ? v.name : '';
   document.getElementById('varRol').value    = v ? v.role : 'sensor';
   document.getElementById('varTipo').value   = v ? v.data_type : 'float';
-  document.getElementById('varDir').value    = v ? '' : '';   // dejar Auto por defecto
+  document.getElementById('varDir').value    = v ? (v.direction || '') : '';
   document.getElementById('varUnidad').value = v ? (v.unit || '') : '';
   document.getElementById('varMin').value    = v && v.min_val!=null ? v.min_val : '';
   document.getElementById('varMax').value    = v && v.max_val!=null ? v.max_val : '';
